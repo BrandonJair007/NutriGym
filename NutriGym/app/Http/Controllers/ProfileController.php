@@ -6,6 +6,7 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
@@ -24,17 +25,33 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        // 1. Obtenemos el ID del usuario que tiene la sesión iniciada
+        $id = Auth::id();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
+        // 2. Validamos los datos enviados desde tu modal
+        $request->validate([
+            'nombre' => 'required|string|max:255|unique:usuarios,nombre,' . $id,
+            'email' => 'required|email|max:255|unique:usuarios,email,' . $id,
+            'fecha_nacimiento' => 'required|date|before:-18 years',
+        ], [
+            'nombre.unique' => 'Este nombre de usuario ya está en uso por otra persona.',
+            'email.unique' => 'Este correo electrónico ya está registrado.',
+            'fecha_nacimiento.before' => 'Debes ser mayor de 18 años.',
+        ]);
 
-        $request->user()->save();
+        // 3. Actualizamos en la base de datos
+        DB::table('usuarios')
+            ->where('id', $id)
+            ->update([
+                'nombre' => $request->nombre,
+                'email' => $request->email,
+                'fecha_nacimiento' => $request->fecha_nacimiento,
+            ]);
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        // 4. Redirigimos de vuelta a tu panel con un mensaje de éxito
+        return back()->with('success', 'Tus datos personales han sido actualizados correctamente.');
     }
 
     /**

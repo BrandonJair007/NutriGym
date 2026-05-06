@@ -8,36 +8,39 @@
         </h2>
 
         <!-- Formulario -->
-        <form method="POST" action="{{ route('login') }}">
+        <form method="POST" action="{{ route('login.store') }}">
             @csrf
 
             <!-- Email -->
             <div class="mb-4">
-                <label for="email" class="block text-sm font-medium mb-1">Correo</label>
+                <label for="email" class="block text-sm font-medium mb-1">Correo *</label>
                 <input type="email" id="email" name="email"
-                       class="input-neu"
-                       value="{{ old('email') }}" required autofocus>
+                       class="input-neu w-full @error('email') border-red-500 @enderror"
+                       value="{{ old('email') }}" required autofocus placeholder="correo@ejemplo.com">
                 @error('email')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    <p class="text-red-500 text-xs mt-1">⚠️ {{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Password -->
             <div class="mb-6">
-                <label for="password" class="block text-sm font-medium mb-1">Contraseña</label>
+                <label for="password" class="block text-sm font-medium mb-1">Contraseña *</label>
                 <input type="password" id="password" name="contrasena"
-                       class="input-neu"
-                       required>
-                @error('password')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                       class="input-neu w-full @error('contrasena') border-red-500 @enderror"
+                       required placeholder="••••••••">
+                @error('contrasena')
+                    <p class="text-red-500 text-xs mt-1">⚠️ {{ $message }}</p>
                 @enderror
             </div>
 
-            <!-- Remember me -->
+            <!-- Remember me (Activado) -->
             <div class="flex items-center mb-6">
-                <input type="checkbox" id="remember" name="remember"
-                       class="mr-2">
-                <label for="remember" class="text-sm">Recuérdame</label>
+                <input type="checkbox" id="remember" name="remember" 
+                       class="mr-2 cursor-pointer"
+                       {{ old('remember') ? 'checked' : '' }}>
+                <label for="remember" class="text-sm cursor-pointer select-none text-gray-600">
+                    Recuérdame
+                </label>
             </div>
 
             <!-- Botón -->
@@ -49,9 +52,9 @@
 
             <!-- Link de registro -->
             <div class="mt-4 text-center">
-                <p class="text-sm">
+                <p class="text-sm text-gray-500">
                     ¿No tienes cuenta?
-                    <a href="{{ route('registrar_usuario') }}" class="text-[var(--color-accent)] hover:underline">
+                    <a href="{{ route('registrar_usuario') }}" class="text-[var(--color-accent)] font-semibold hover:underline">
                         Regístrate aquí
                     </a>
                 </p>

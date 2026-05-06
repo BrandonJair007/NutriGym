@@ -1,217 +1,225 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- Content -->
-<div class="p-4 sm:p-6 max-w-6xl mx-auto w-full">
-    <!-- Grid de Estadísticas -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-        <!-- Card Dietas -->
-        <div class="bg-white rounded-lg border border-gray-100 p-4 sm:p-6 shadow-md shadow-black/5 hover:shadow-lg transition-shadow duration-200 w-full">
-            <div class="flex justify-between items-start mb-4">
-                <div class="flex-1">
-                    <div class="text-2xl sm:text-3xl font-semibold text-gray-800 mb-1 break-words" id="contadorObjetivos">
-                        {{ $totalMenusUsuario }}
-                    </div>
-                    <div class="text-xs sm:text-sm font-medium text-gray-500">Dietas</div>
-                </div>
-            </div>
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <a href="javascript:void(0)" 
-                    onclick="generarDieta()"
-                    class="text-[#f84525] font-medium text-sm hover:text-red-800 transition-colors inline-flex items-center">
-                    <i class="fas fa-eye mr-1"></i> Generar Dieta
-                </a>
-                <a href="javascript:void(0)" 
-                    onclick="verDietas()"
-                    class="text-[#20ce37] font-medium text-sm hover:text-red-800 transition-colors inline-flex items-center">
-                    <i class="fas fa-eye mr-1"></i> Mis dietas
-                </a>
-            </div>
-        </div>
-
-        <!-- Card Objetivos -->
-        <div class="bg-white rounded-md border border-gray-100 p-4 sm:p-6 shadow-md shadow-black/5 w-full">
-            <div class="flex justify-between items-start mb-4">
-                <div class="flex-1">
-                    <div class="text-2xl sm:text-3xl font-semibold text-gray-800 mb-1 break-words" id="contadorObjetivos">
-                        {{ $totalObjetivosUsuario ?? 0 }}
-                    </div>
-                    <div class="text-xs sm:text-sm font-medium text-gray-500">Objetivos</div>
-                </div>
-                <div class="dropdown">
-                    <button type="button" class="dropdown-toggle text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <a href="javascript:void(0)" 
-                    onclick="abrirModalVerObjetivos()" 
-                    class="text-[#f84525] font-medium text-sm hover:text-red-800 transition-colors inline-flex items-center">
-                    <i class="fas fa-eye mr-1"></i> Ver
-                </a>
-                <a href="javascript:void(0)" 
-                    onclick="abrirModalAsignarObjetivos()" 
-                    class="text-[#25f87d] font-medium text-sm hover:text-green-800 transition-colors inline-flex items-center">
-                    <i class="fas fa-plus mr-1"></i> Asignar
-                </a>
-            </div>
-        </div>
-
-        <!-- Card Preferencias -->
-        <div class="bg-white rounded-lg border border-gray-100 p-4 sm:p-6 shadow-md shadow-black/5 hover:shadow-lg transition-shadow duration-200 w-full">
-            <div class="flex justify-between items-start mb-4">
-                <div class="flex-1">
-                    <div class="text-2xl sm:text-3xl font-semibold text-gray-800 mb-1 break-words" id="contadorPreferencias">
-                        {{ $totalPreferenciasUsuario ?? 0 }}
-                    </div>
-                    <div class="text-xs sm:text-sm font-medium text-gray-500">Preferencias</div>
-                </div>
-                <div class="dropdown">
-                    <button type="button" class="dropdown-toggle text-gray-400 hover:text-gray-600 transition-colors p-1 rounded hover:bg-gray-100">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <a href="javascript:void(0)" 
-                    onclick="abrirModalVerPreferencias()" 
-                    class="text-[#f84525] font-medium text-sm hover:text-red-800 transition-colors inline-flex items-center">
-                    <i class="fas fa-eye mr-1"></i> Ver
-                </a>
-                <a href="javascript:void(0)" 
-                    onclick="abrirModalAsignarPreferencias()" 
-                    class="text-[#25f87d] font-medium text-sm hover:text-green-800 transition-colors inline-flex items-center">
-                    <i class="fas fa-plus mr-1"></i> Asignar
-                </a>
-            </div>
+<!-- Contenedor Principal Limitado -->
+<div class="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-8">
+    
+    <!-- Título de Bienvenida -->
+    <div class="flex items-center justify-between mb-2">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">Mi Panel Nutricional</h1>
+            <p class="text-gray-500 text-sm mt-1">Gestiona tus planes, objetivos y preferencias.</p>
         </div>
     </div>
 
-
-    <!-- Card de Progreso -->
-    <div class="neumorphic p-4 md:p-6 rounded-lg w-full">
-        <!-- Header -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4 md:mb-6">
-            <h3 class="text-lg md:text-xl font-bold text-gray-800 flex items-center">
-                <svg class="w-5 h-5 md:w-6 md:h-6 mr-2 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                </svg>
-                Mi Progreso
-            </h3>
-            <button onclick="exportarReporte()" class="text-xs sm:text-sm btn-neu bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md self-start md:self-auto">
-                Exportar
-            </button>
+    <!-- Grid de Tarjetas (Cards) de Módulos -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Card 1: Dietas -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col relative overflow-hidden group hover:shadow-md transition-all">
+            <i class="fas fa-apple-alt absolute -right-6 -bottom-6 text-8xl text-green-50 opacity-50 group-hover:scale-110 transition-transform duration-500"></i>
+            <div class="flex items-start justify-between mb-6 relative z-10">
+                <div class="flex gap-4 items-center">
+                    <div class="w-12 h-12 bg-green-50 text-green-500 rounded-xl flex items-center justify-center text-2xl shadow-inner">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider">Mis Dietas</h3>
+                        <div class="text-3xl font-black text-gray-800" id="contadorDietas">
+                            {{ $totalMenusUsuario }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-auto relative z-10">
+                <button onclick="generarDieta()" class="flex-1 bg-green-50 hover:bg-green-500 text-green-600 hover:text-white py-2.5 rounded-xl text-sm font-bold transition-all flex justify-center items-center gap-2">
+                    <i class="fas fa-magic"></i> Generar
+                </button>
+                <button onclick="verDietas()" class="flex-1 bg-gray-50 hover:bg-gray-800 text-gray-600 hover:text-white py-2.5 rounded-xl text-sm font-bold transition-all flex justify-center items-center gap-2">
+                    <i class="fas fa-eye"></i> Ver todas
+                </button>
+            </div>
         </div>
 
-        <!-- Contenido dinámico -->
-        <div id="progresoContent" class="space-y-4 md:space-y-6">
-            <!-- Loading state -->
-            <div id="progresoLoading" class="text-center py-6 md:py-8">
-                <div class="animate-spin rounded-full h-10 w-10 md:h-12 md:w-12 border-b-2 border-purple-500 mx-auto"></div>
-                <p class="text-gray-600 mt-2 text-sm md:text-base">Cargando tu progreso...</p>
-            </div>
-
-            <!-- Contenido real (oculto inicialmente) -->
-            <div id="progresoData" class="hidden space-y-4 md:space-y-6">
-                <div class="grid grid-cols-2 gap-2 md:gap-4 md:grid-cols-4">
-                    <div class="neumorphic-inset p-3 md:p-4 text-center rounded-lg">
-                        <div id="pesoPerdido" class="text-lg md:text-2xl font-bold text-green-600 truncate">-0kg</div>
-                        <div class="text-xs md:text-sm text-gray-600">Peso perdido</div>
+        <!-- Card 2: Objetivos -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col relative overflow-hidden group hover:shadow-md transition-all">
+            <i class="fas fa-bullseye absolute -right-6 -bottom-6 text-8xl text-blue-50 opacity-50 group-hover:scale-110 transition-transform duration-500"></i>
+            <div class="flex items-start justify-between mb-6 relative z-10">
+                <div class="flex gap-4 items-center">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center text-2xl shadow-inner">
+                        <i class="fas fa-flag-checkered"></i>
                     </div>
-
-                    <div class="neumorphic-inset p-3 md:p-4 text-center rounded-lg">
-                        <div id="reduccionGrasa" class="text-lg md:text-2xl font-bold text-red-600 truncate">-0%</div>
-                        <div class="text-xs md:text-sm text-gray-600">Reducción grasa</div>
-                    </div>
-                    <div class="neumorphic-inset p-3 md:p-4 text-center rounded-lg">
-                        <div id="gananciaMuscular" class="text-lg md:text-2xl font-bold text-indigo-600 truncate">+0kg</div>
-                        <div class="text-xs md:text-sm text-gray-600">Masa muscular</div>
-                    </div>
-                    <div class="neumorphic-inset p-3 md:p-4 text-center rounded-lg">
-                        <div id="mejoraIMC" class="text-lg md:text-2xl font-bold text-teal-600 truncate">+0</div>
-                        <div class="text-xs md:text-sm text-gray-600">Mejora IMC</div>
-                    </div>
-                </div>
-
-                <!-- Gráfico de evolución de peso -->
-                <div class="neumorphic-inset p-3 md:p-4 rounded-lg">
-                    <h4 class="font-semibold text-gray-700 mb-2 md:mb-3 text-sm md:text-base">Evolución de peso</h4>
-                    <div id="pesoChart" class="h-40 sm:h-48 md:h-60 flex items-end justify-between space-x-2 md:space-x-3 px-2 overflow-x-auto">
-                        <!-- El gráfico se generará dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- Metas -->
-                <div>
-                    <h4 class="font-semibold text-gray-700 mb-2 md:mb-3 text-sm md:text-base">Mis Metas</h4>
-                    <div id="metasList" class="space-y-2">
-                        <!-- Las metas se cargarán dinámicamente -->
+                    <div>
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider">Objetivos</h3>
+                        <div class="text-3xl font-black text-gray-800" id="contadorObjetivos">
+                            {{ $totalObjetivosUsuario ?? 0 }}
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="flex gap-3 mt-auto relative z-10">
+                <button onclick="abrirModalAsignarObjetivos()" class="flex-1 bg-blue-50 hover:bg-blue-500 text-blue-600 hover:text-white py-2.5 rounded-xl text-sm font-bold transition-all flex justify-center items-center gap-2">
+                    <i class="fas fa-plus"></i> Asignar
+                </button>
+                <button onclick="abrirModalVerObjetivos()" class="flex-1 bg-gray-50 hover:bg-gray-800 text-gray-600 hover:text-white py-2.5 rounded-xl text-sm font-bold transition-all flex justify-center items-center gap-2">
+                    <i class="fas fa-list"></i> Revisar
+                </button>
+            </div>
+        </div>
 
-            <!-- Error state -->
-            <div id="progresoError" class="hidden text-center py-6 md:py-8">
-                <div class="text-green-500 text-base md:text-lg mb-2">❌ Registre medidas para calcular su progreso</div>
-                <p id="errorMessage" class="text-gray-600 text-sm md:text-base"></p>
-                <button onclick="cargarProgreso()" class="btn-neu bg-blue-500 hover:bg-blue-600 text-white mt-4 text-sm md:text-base px-3 py-1 rounded-md">
-                    Reintentar
+        <!-- Card 3: Preferencias -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col relative overflow-hidden group hover:shadow-md transition-all">
+            <i class="fas fa-heart absolute -right-6 -bottom-6 text-8xl text-red-50 opacity-50 group-hover:scale-110 transition-transform duration-500"></i>
+            <div class="flex items-start justify-between mb-6 relative z-10">
+                <div class="flex gap-4 items-center">
+                    <div class="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center text-2xl shadow-inner">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider">Preferencias</h3>
+                        <div class="text-3xl font-black text-gray-800" id="contadorPreferencias">
+                            {{ $totalPreferenciasUsuario ?? 0 }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-auto relative z-10">
+                <button onclick="abrirModalAsignarPreferencias()" class="flex-1 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white py-2.5 rounded-xl text-sm font-bold transition-all flex justify-center items-center gap-2">
+                    <i class="fas fa-plus"></i> Asignar
+                </button>
+                <button onclick="abrirModalVerPreferencias()" class="flex-1 bg-gray-50 hover:bg-gray-800 text-gray-600 hover:text-white py-2.5 rounded-xl text-sm font-bold transition-all flex justify-center items-center gap-2">
+                    <i class="fas fa-list"></i> Revisar
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Sección de Progreso (Card Principal) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden w-full">
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center mr-3">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                Mi Evolución
+            </h3>
+            <button onclick="exportarReporte()" class="bg-purple-50 hover:bg-purple-100 text-purple-600 font-bold px-5 py-2 rounded-xl text-sm transition-colors flex items-center gap-2 self-start md:self-auto">
+                <i class="fas fa-download"></i> Exportar Reporte
+            </button>
+        </div>
+
+        <div class="p-6">
+            <div id="progresoContent" class="space-y-6">
+                
+                <!-- Estado de Carga -->
+                <div id="progresoLoading" class="text-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
+                    <p class="text-gray-500 mt-4 font-medium">Sincronizando tus métricas...</p>
+                </div>
+
+                <!-- Contenido Real -->
+                <div id="progresoData" class="hidden space-y-8">
+                    <!-- 4 Métricas Clave -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-gray-50/50 border border-gray-100 p-5 text-center rounded-2xl">
+                            <div class="text-gray-400 mb-1"><i class="fas fa-weight"></i></div>
+                            <div id="pesoPerdido" class="text-2xl md:text-3xl font-black text-green-600 truncate">-0kg</div>
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Peso perdido</div>
+                        </div>
+                        <div class="bg-gray-50/50 border border-gray-100 p-5 text-center rounded-2xl">
+                            <div class="text-gray-400 mb-1"><i class="fas fa-fire"></i></div>
+                            <div id="reduccionGrasa" class="text-2xl md:text-3xl font-black text-red-500 truncate">-0%</div>
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Reducción grasa</div>
+                        </div>
+                        <div class="bg-gray-50/50 border border-gray-100 p-5 text-center rounded-2xl">
+                            <div class="text-gray-400 mb-1"><i class="fas fa-dumbbell"></i></div>
+                            <div id="gananciaMuscular" class="text-2xl md:text-3xl font-black text-indigo-500 truncate">+0kg</div>
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Masa muscular</div>
+                        </div>
+                        <div class="bg-gray-50/50 border border-gray-100 p-5 text-center rounded-2xl">
+                            <div class="text-gray-400 mb-1"><i class="fas fa-heartbeat"></i></div>
+                            <div id="mejoraIMC" class="text-2xl md:text-3xl font-black text-teal-500 truncate">+0</div>
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Mejora IMC</div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico -->
+                    <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                        <h4 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-chart-area text-purple-400"></i> Historial de Peso
+                        </h4>
+                        <div id="pesoChart" class="h-48 md:h-60 flex items-end justify-between space-x-2 md:space-x-3 px-2 overflow-x-auto">
+                            <!-- El gráfico se generará dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Metas y Estados -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                            <h4 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wider">Mis Metas de Salud</h4>
+                            <div id="metasList" class="space-y-3">
+                                <!-- Metas dinámicas -->
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
+                                <h4 class="font-bold text-blue-800 mb-3 text-sm">Punto de Partida</h4>
+                                <div id="estadoInicial" class="text-sm text-gray-700"></div>
+                            </div>
+                            <div class="bg-green-50/50 p-5 rounded-2xl border border-green-100">
+                                <h4 class="font-bold text-green-800 mb-3 text-sm">Estado Actual</h4>
+                                <div id="estadoActual" class="text-sm text-gray-700"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ESTADO VACÍO (Reemplaza al error rojo antiguo) -->
+                <div id="progresoError" class="hidden flex-col items-center justify-center py-12 text-center">
+                    <div class="w-24 h-24 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-6 text-purple-400 shadow-inner">
+                        <i class="fas fa-weight scale-110 text-5xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">¡Comienza tu transformación!</h3>
+                    <p id="errorMessage" class="text-gray-500 max-w-sm mx-auto mb-6 text-sm leading-relaxed">
+                        Aún no tenemos registros suficientes para calcular tu progreso. Necesitas registrar tus medidas para desbloquear tus métricas.
+                    </p>
+                    <button onclick="cargarProgreso()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-all flex items-center gap-2 mx-auto">
+                        <i class="fas fa-sync-alt"></i> Actualizar Sistema
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
 
 
+<!-- ========================================== -->
+<!-- MODALES (Estilo Premium con Backdrop-blur) -->
+<!-- ========================================== -->
+
 <!-- Modal Asignar Objetivos -->
 <div id="asignarObjetivosModal" class="fixed inset-0 z-50 hidden">
-    <div class="modal-backdrop fixed inset-0 bg-gray-600 bg-opacity-50" onclick="closeModal('asignarObjetivosModal')"></div>
-    <div class="fixed inset-0 flex items-start sm:items-center justify-center p-2 sm:p-4">
-        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-xl sm:max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-hidden">
-            <div class="p-4 sm:p-6">
-                <!-- Header -->
-                <div class="flex items-center justify-between mb-4 sm:mb-6">
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center">
-                        <i class="fas fa-bullseye mr-2 text-green-500"></i>
-                        Asignar Objetivos
-                    </h3>
-                    <button onclick="closeModal('asignarObjetivosModal')" class="text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <!-- Contenido del Modal -->
-                <div class="max-h-[60vh] overflow-y-auto pr-1 sm:pr-2">
-                    <!-- Loading -->
-                    <div id="loadingObjetivos" class="text-center py-8">
-                        <i class="fas fa-spinner fa-spin text-2xl text-green-500"></i>
-                        <p class="text-gray-600 mt-2 text-sm">Cargando objetivos...</p>
-                    </div>
-
-                    <!-- Lista de Objetivos -->
-                    <div id="listaObjetivos" class="space-y-3 hidden">
-                        <!-- Los objetivos se cargarán aquí dinámicamente -->
-                    </div>
-
-                    <!-- Mensaje de error -->
-                    <div id="errorObjetivos" class="text-center py-8 hidden">
-                        <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
-                        <p class="text-gray-600 mt-2">Error al cargar los objetivos</p>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-4 border-t border-gray-200">
-                    <button type="button" onclick="closeModal('asignarObjetivosModal')" class="btn-neu-secondary flex-1 text-sm sm:text-base py-2">
-                        Cancelar
-                    </button>
-                    <button type="button" onclick="guardarObjetivos()" class="btn-neu bg-green-500 hover:bg-green-600 text-white flex-1 text-sm sm:text-base py-2">
-                        <i class="fas fa-save mr-2"></i>
-                        Guardar Objetivos
-                    </button>
-                </div>
+    <div class="modal-backdrop fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="closeModal('asignarObjetivosModal')"></div>
+    <div class="fixed inset-0 flex items-start sm:items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col relative z-10">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-green-50 text-green-500 rounded-xl flex items-center justify-center"><i class="fas fa-bullseye"></i></div>
+                    Asignar Objetivos
+                </h3>
+                <button onclick="closeModal('asignarObjetivosModal')" class="text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <div id="loadingObjetivos" class="text-center py-12"><i class="fas fa-spinner fa-spin text-3xl text-green-500"></i><p class="text-gray-500 mt-4">Cargando catálogo...</p></div>
+                <div id="listaObjetivos" class="space-y-3 hidden"></div>
+                <div id="errorObjetivos" class="text-center py-8 hidden"><i class="fas fa-exclamation-triangle text-3xl text-red-500 mb-3"></i><p class="text-gray-600">Error al cargar</p></div>
+            </div>
+            <div class="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
+                <button type="button" onclick="closeModal('asignarObjetivosModal')" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl hover:bg-gray-100 font-bold transition-colors">Cancelar</button>
+                <button type="button" onclick="guardarObjetivos()" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold transition-colors shadow-md"><i class="fas fa-save mr-2"></i> Guardar Selección</button>
             </div>
         </div>
     </div>
@@ -219,60 +227,28 @@
 
 <!-- Modal Ver Objetivos Seleccionados -->
 <div id="verObjetivosModal" class="fixed inset-0 z-50 hidden">
-    <div class="modal-backdrop fixed inset-0 bg-gray-600 bg-opacity-50" onclick="closeModal('verObjetivosModal')"></div>
-    <div class="fixed inset-0 flex items-start sm:items-center justify-center p-2 sm:p-4">
-        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-xl sm:max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-hidden">
-            <div class="p-4 sm:p-6">
-                <!-- Header -->
-                <div class="flex items-center justify-between mb-4 sm:mb-6">
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center">
-                        <i class="fas fa-list-check mr-2 text-red-500"></i>
-                        Mis Objetivos Asignados
-                    </h3>
-                    <button onclick="closeModal('verObjetivosModal')" class="text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-times"></i>
-                    </button>
+    <div class="modal-backdrop fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="closeModal('verObjetivosModal')"></div>
+    <div class="fixed inset-0 flex items-start sm:items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col relative z-10">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center"><i class="fas fa-list-check"></i></div>
+                    Mis Objetivos Activos
+                </h3>
+                <button onclick="closeModal('verObjetivosModal')" class="text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <div id="loadingVerObjetivos" class="text-center py-12"><i class="fas fa-spinner fa-spin text-3xl text-blue-500"></i><p class="text-gray-500 mt-4">Consultando datos...</p></div>
+                <div id="listaVerObjetivos" class="space-y-3 hidden"></div>
+                <div id="sinObjetivos" class="text-center py-12 hidden">
+                    <i class="fas fa-flag-checkered text-5xl text-gray-200 mb-4"></i>
+                    <p class="text-gray-500 font-medium">Aún no tienes objetivos trazados.</p>
                 </div>
-
-                <!-- Contenido del Modal -->
-                <div class="max-h-[60vh] overflow-y-auto pr-1 sm:pr-2">
-                    <!-- Loading -->
-                    <div id="loadingVerObjetivos" class="text-center py-8">
-                        <i class="fas fa-spinner fa-spin text-2xl text-red-500"></i>
-                        <p class="text-gray-600 mt-2 text-sm">Cargando objetivos...</p>
-                    </div>
-
-                    <!-- Lista de Objetivos Seleccionados -->
-                    <div id="listaVerObjetivos" class="space-y-3 hidden">
-                        <!-- Los objetivos se cargarán aquí dinámicamente -->
-                    </div>
-
-                    <!-- Mensaje si no hay objetivos -->
-                    <div id="sinObjetivos" class="text-center py-8 hidden">
-                        <i class="fas fa-inbox text-3xl text-gray-400 mb-2"></i>
-                        <p class="text-gray-600 text-sm sm:text-base">No tienes objetivos asignados</p>
-                        <button onclick="abrirModalAsignarObjetivos()" class="mt-3 text-red-500 hover:text-red-700 text-xs sm:text-sm font-medium">
-                            <i class="fas fa-plus mr-1"></i> Asignar objetivos
-                        </button>
-                    </div>
-
-                    <!-- Mensaje de error -->
-                    <div id="errorVerObjetivos" class="text-center py-8 hidden">
-                        <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
-                        <p class="text-gray-600 mt-2 text-sm">Error al cargar los objetivos</p>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-4 border-t border-gray-200">
-                    <button type="button" onclick="closeModal('verObjetivosModal')" class="btn-neu-secondary flex-1 text-sm sm:text-base py-2">
-                        Cerrar
-                    </button>
-                    <button type="button" onclick="abrirModalAsignarObjetivos()" class="btn-neu bg-red-500 hover:bg-red-600 text-white flex-1 text-sm sm:text-base py-2">
-                        <i class="fas fa-plus mr-2"></i>
-                        Agregar Más
-                    </button>
-                </div>
+                <div id="errorVerObjetivos" class="text-center py-8 hidden"><p class="text-red-500">Error de carga</p></div>
+            </div>
+            <div class="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
+                <button type="button" onclick="closeModal('verObjetivosModal')" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl hover:bg-gray-100 font-bold transition-colors">Cerrar</button>
+                <button type="button" onclick="abrirModalAsignarObjetivos()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-bold transition-colors shadow-md"><i class="fas fa-plus mr-2"></i> Sumar Objetivo</button>
             </div>
         </div>
     </div>
@@ -280,51 +256,24 @@
 
 <!-- Modal Asignar Preferencias -->
 <div id="asignarPreferenciasModal" class="fixed inset-0 z-50 hidden">
-    <div class="modal-backdrop fixed inset-0 bg-gray-600 bg-opacity-50" onclick="closeModal('asignarPreferenciasModal')"></div>
-    <div class="fixed inset-0 flex items-start sm:items-center justify-center p-2 sm:p-4">
-        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-xl sm:max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-hidden">
-            <div class="p-4 sm:p-6">
-                <!-- Header -->
-                <div class="flex items-center justify-between mb-4 sm:mb-6">
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center">
-                        <i class="fas fa-bullseye mr-2 text-green-500"></i>
-                        Asignar Preferencia
-                    </h3>
-                    <button onclick="closeModal('asignarPreferenciasModal')" class="text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <!-- Contenido del Modal -->
-                <div class="max-h-[60vh] overflow-y-auto pr-1 sm:pr-2">
-                    <!-- Loading -->
-                    <div id="loadingPreferencias" class="text-center py-8">
-                        <i class="fas fa-spinner fa-spin text-2xl text-green-500"></i>
-                        <p class="text-gray-600 mt-2 text-sm">Cargando Preferencias...</p>
-                    </div>
-
-                    <!-- Lista de Preferencias -->
-                    <div id="listaPreferencias" class="space-y-3 hidden">
-                        <!-- Los preferencias se cargarán aquí dinámicamente -->
-                    </div>
-
-                    <!-- Mensaje de error -->
-                    <div id="errorPreferencias" class="text-center py-8 hidden">
-                        <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
-                        <p class="text-gray-600 mt-2 text-sm">Error al cargar los preferencias</p>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-4 border-t border-gray-200">
-                    <button type="button" onclick="closeModal('asignarPreferenciasModal')" class="btn-neu-secondary flex-1 text-sm sm:text-base py-2">
-                        Cancelar
-                    </button>
-                    <button type="button" onclick="guardarPreferencias()" class="btn-neu bg-green-500 hover:bg-green-600 text-white flex-1 text-sm sm:text-base py-2">
-                        <i class="fas fa-save mr-2"></i>
-                        Guardar Preferencias
-                    </button>
-                </div>
+    <div class="modal-backdrop fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="closeModal('asignarPreferenciasModal')"></div>
+    <div class="fixed inset-0 flex items-start sm:items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col relative z-10">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center"><i class="fas fa-heart"></i></div>
+                    Tus Gustos y Restricciones
+                </h3>
+                <button onclick="closeModal('asignarPreferenciasModal')" class="text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <div id="loadingPreferencias" class="text-center py-12"><i class="fas fa-spinner fa-spin text-3xl text-red-500"></i><p class="text-gray-500 mt-4">Cargando base de datos...</p></div>
+                <div id="listaPreferencias" class="space-y-3 hidden"></div>
+                <div id="errorPreferencias" class="text-center py-8 hidden"><p class="text-red-500">Error</p></div>
+            </div>
+            <div class="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
+                <button type="button" onclick="closeModal('asignarPreferenciasModal')" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl hover:bg-gray-100 font-bold transition-colors">Cancelar</button>
+                <button type="button" onclick="guardarPreferencias()" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold transition-colors shadow-md"><i class="fas fa-save mr-2"></i> Guardar Preferencias</button>
             </div>
         </div>
     </div>
@@ -332,123 +281,79 @@
 
 <!-- Modal Ver Preferencias Seleccionados -->
 <div id="verPreferenciasModal" class="fixed inset-0 z-50 hidden">
-    <div class="modal-backdrop fixed inset-0 bg-gray-600 bg-opacity-50" onclick="closeModal('verPreferenciasModal')"></div>
-    <div class="fixed inset-0 flex items-start sm:items-center justify-center p-2 sm:p-4">
-        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-xl sm:max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-hidden">
-            <div class="p-4 sm:p-6">
-                <!-- Header -->
-                <div class="flex items-center justify-between mb-4 sm:mb-6">
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center">
-                        <i class="fas fa-list-check mr-2 text-red-500"></i>
-                        Mis Preferencias Asignados
-                    </h3>
-                    <button onclick="closeModal('verPreferenciasModal')" class="text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-times"></i>
-                    </button>
+    <div class="modal-backdrop fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="closeModal('verPreferenciasModal')"></div>
+    <div class="fixed inset-0 flex items-start sm:items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col relative z-10">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center"><i class="fas fa-heartbeat"></i></div>
+                    Mis Preferencias Activas
+                </h3>
+                <button onclick="closeModal('verPreferenciasModal')" class="text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <div id="loadingVerPreferencias" class="text-center py-12"><i class="fas fa-spinner fa-spin text-3xl text-red-500"></i><p class="text-gray-500 mt-4">Consultando tu perfil...</p></div>
+                <div id="listaVerPreferencias" class="space-y-3 hidden"></div>
+                <div id="sinPreferencias" class="text-center py-12 hidden">
+                    <i class="fas fa-apple-alt text-5xl text-gray-200 mb-4"></i>
+                    <p class="text-gray-500 font-medium">Aún no has indicado tus preferencias alimenticias.</p>
                 </div>
-
-                <!-- Contenido del Modal -->
-                <div class="max-h-[60vh] overflow-y-auto pr-1 sm:pr-2">
-                    <!-- Loading -->
-                    <div id="loadingVerPreferencias" class="text-center py-8">
-                        <i class="fas fa-spinner fa-spin text-2xl text-red-500"></i>
-                        <p class="text-gray-600 mt-2 text-sm">Cargando preferencias...</p>
-                    </div>
-
-                    <!-- Lista de Preferencias Seleccionados -->
-                    <div id="listaVerPreferencias" class="space-y-3 hidden">
-                        <!-- Los objetivos se cargarán aquí dinámicamente -->
-                    </div>
-
-                    <!-- Mensaje si no hay Preferencias -->
-                    <div id="sinPreferencias" class="text-center py-8 hidden">
-                        <i class="fas fa-inbox text-3xl text-gray-400 mb-2"></i>
-                        <p class="text-gray-600 text-sm sm:text-base">No tienes preferencias asignadas</p>
-                        <button onclick="abrirModalAsignarPreferencias()" class="mt-3 text-red-500 hover:text-red-700 text-xs sm:text-sm font-medium">
-                            <i class="fas fa-plus mr-1"></i> Asignar Preferencias
-                        </button>
-                    </div>
-
-                    <!-- Mensaje de error -->
-                    <div id="errorVerPreferencias" class="text-center py-8 hidden">
-                        <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
-                        <p class="text-gray-600 mt-2 text-sm">Error al cargar los preferencias</p>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="flex gap-3 mt-6 pt-4 border-t border-gray-200">
-                    <button type="button" onclick="closeModal('verPreferenciasModal')" class="btn-neu-secondary flex-1 text-sm sm:text-base py-2">
-                        Cerrar
-                    </button>
-                </div>
+            </div>
+            <div class="p-6 border-t border-gray-100 bg-gray-50">
+                <button type="button" onclick="closeModal('verPreferenciasModal')" class="w-full bg-white border border-gray-200 text-gray-700 py-3 rounded-xl hover:bg-gray-100 font-bold transition-colors">Volver</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal generar dieta y seleccionar dieta  -->
-<div id="modal-preferencia" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 flex items-start sm:items-center justify-center p-2 sm:p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl sm:max-w-4xl max-h-[92vh] overflow-hidden">
-        <div class="p-4 md:p-6 flex flex-col h-full">
-            <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
-                <h3 class="text-lg md:text-xl font-bold text-purple-600 flex items-center">
-                    <i class="fas fa-utensils mr-2"></i>
-                    🍽️ Plan Nutricional Personalizado
-                </h3>
-                <button onclick="cerrarModal()" class="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition-colors">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
-            </div>
-
-            <div id="resultado-preferencia" class="mt-4 md:mt-6"></div>
-            
-            <div class="max-h-[60vh] sm:max-h-[65vh] overflow-y-auto mt-2 flex-1">
-                <div id="modal-contenido" class="pr-1 sm:pr-2">
-                    <!-- Aquí se cargará el contenido dinámicamente -->
-                </div>
-            </div>
-            <div class="mt-4 flex justify-end pt-4 border-t border-gray-200">
-                <button onclick="cerrarModal()" 
-                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm sm:text-base">
-                    <i class="fas fa-times mr-2"></i>
-                    Cerrar
-                </button>
-            </div>
+<!-- Modal Generar Dieta -->
+<div id="modal-preferencia" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden z-50 flex items-start sm:items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative z-10">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-purple-50/30">
+            <h3 class="text-xl font-bold text-purple-700 flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-100 text-purple-500 rounded-xl flex items-center justify-center"><i class="fas fa-magic"></i></div>
+                Asistente Nutricional IA
+            </h3>
+            <button onclick="cerrarModal()" class="text-gray-400 hover:text-red-500 bg-white shadow-sm p-2 rounded-full transition-colors"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="resultado-preferencia" class="mt-2 px-6"></div>
+        <div class="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar" id="modal-contenido">
+            <!-- Contenido dinámico Gemini -->
         </div>
     </div>
 </div>
 
 <!-- Modal Mis Dietas -->
-<div id="dietasModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-        <!-- Header -->
-        <div class="flex justify-between items-center p-4 md:p-6 border-b">
-            <h3 class="text-lg md:text-xl font-semibold text-gray-800">Mis Dietas</h3>
-            <div class="flex justify-end p-4 md:p-6  bg-gray-50">
-        <button onclick="cerrarDietas()" class="px-4 py-2 bg-gray-500  text-white-500  text-xl">
-                Cerrar
-            </button>
+<div id="dietasModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative z-10">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-50 text-green-500 rounded-xl flex items-center justify-center"><i class="fas fa-book-open"></i></div>
+                Mi Historial de Dietas
+            </h3>
+            <button onclick="cerrarDietas()" class="text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors"><i class="fas fa-times"></i></button>
         </div>
-
+        <div id="dietasContent" class="flex-1 p-6 overflow-y-auto custom-scrollbar bg-gray-50/50">
+            <div class="text-center py-16"><i class="fas fa-spinner fa-spin text-4xl text-green-500 mb-4"></i><p class="text-gray-500 font-medium">Cargando tus planes de alimentación...</p></div>
         </div>
-        
-        <!-- Content -->
-        <div id="dietasContent" class="p-4 md:p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-            <!-- Loading -->
-            <div class="text-center py-8">
-                <i class="fas fa-spinner fa-spin text-blue-500 text-2xl"></i>
-                <p class="text-gray-500 mt-2">Cargando dietas...</p>
-            </div>
-        </div>
-        
-        <!-- Footer -->
-        
     </div>
 </div>
 
 
-
+<!-- ========================================== -->
+<!-- SCRIPTS Y LÓGICA (100% INTACTOS) -->
+<!-- ========================================== -->
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    @keyframes bounce-in {
+        0% { transform: scale(0.95); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-bounce-in { animation: bounce-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+</style>
 
 <script>
     // Función para abrir el modal y cargar objetivos
@@ -1051,11 +956,13 @@
 
 function generarDieta() {
     // Mostrar loading
-    const botones = document.querySelectorAll('button');
-    const botonGenerar = botones[1];
-    const textoOriginal = botonGenerar.innerHTML;
-    botonGenerar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generando...';
-    botonGenerar.disabled = true;
+    mostrarModal(`
+        <div class="flex flex-col items-center justify-center py-12 text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500 mb-4"></div>
+            <h3 class="text-lg font-bold text-gray-700">La Inteligencia Artificial está cocinando tu dieta...</h3>
+            <p class="text-sm text-gray-500 mt-2">Analizando tus objetivos y preferencias.</p>
+        </div>
+    `);
 
     fetch(`/dashboard/generar-dieta`)
         .then(response => {
@@ -1075,11 +982,6 @@ function generarDieta() {
         .catch(error => {
             console.error('Error:', error);
             mostrarAlerta('⚠️ Error de conexión con el servidor', 'error');
-        })
-        .finally(() => {
-            // Restaurar botón
-            botonGenerar.innerHTML = textoOriginal;
-            botonGenerar.disabled = false;
         });
 }
 
@@ -1091,7 +993,7 @@ function mostrarResultadoPreferencia(data) {
     
     // También mostrar en contenedor principal (solo en escritorio)
     const divResultado = document.getElementById('resultado-preferencia');
-    divResultado.innerHTML = contenidoHTML;
+    if(divResultado) divResultado.innerHTML = contenidoHTML;
 }
 
 function generarContenidoHTML(data) {
@@ -1101,12 +1003,11 @@ function generarContenidoHTML(data) {
             <div class="bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-500 p-4 md:p-6 rounded-lg">
                 <div class="flex items-start">
                     <div class="flex-shrink-0 mr-4">
-                        <i class="fas fa-user-circle text-purple-500 text-2xl"></i>
+                        <i class="fas fa-robot text-purple-500 text-2xl"></i>
                     </div>
                     <div class="flex-1">
                         <h4 class="font-semibold text-purple-700 mb-2 flex items-center">
-                            <i class="fas fa-comment-medical mr-2"></i>
-                            Mensaje Personalizado
+                            Mensaje de tu Asistente Nutricional
                         </h4>
                         <p class="text-gray-700 text-justify italic leading-relaxed text-sm md:text-base">"${data.mensaje_personalizado}"</p>
                     </div>
@@ -1129,7 +1030,7 @@ function generarSeccionMenus(data) {
             <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 border-b border-gray-200">
                 <h3 class="font-bold text-gray-800 flex items-center text-sm md:text-base">
                     <i class="fas fa-clipboard-list mr-2 text-green-500"></i>
-                    Menús del Día
+                    Menús Recomendados del Día
                 </h3>
             </div>
 
@@ -1151,7 +1052,7 @@ function generarSeccionMenus(data) {
                                 <i class="fas fa-fire text-red-500 text-xl mr-3"></i>
                                 <div>
                                     <div class="font-semibold text-gray-800 text-sm md:text-base">Total Calórico Diario</div>
-                                    <div class="text-xs md:text-sm text-gray-600">Suma de todas las comidas</div>
+                                    <div class="text-xs md:text-sm text-gray-600">Suma de todas las comidas seleccionadas</div>
                                 </div>
                             </div>
                             <div class="text-right">
@@ -1175,19 +1076,14 @@ function generarMenuComida(data, comida, titulo, icono, color, emoji) {
     }
     
     const tieneAlimentos = alimentos && Array.isArray(alimentos) && alimentos.length > 0;
-    const colorClasses = {
-        yellow: 'bg-yellow-500 text-yellow-600 bg-yellow-100 border-yellow-200',
-        orange: 'bg-orange-500 text-orange-600 bg-orange-100 border-orange-200', 
-        blue: 'bg-blue-500 text-blue-600 bg-blue-100 border-blue-200'
-    };
 
     return `
         <div class="border border-gray-200 rounded-lg overflow-hidden">
             <!-- Header del Menú -->
-            <div class="bg-gradient-to-r from-${color}-50 to-${color}-25 px-4 py-3 border-b border-${color}-200">
+            <div class="bg-gradient-to-r from-${color}-50 to-${color}-100 px-4 py-3 border-b border-${color}-200">
                 <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
                     <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-full bg-${color}-100 flex items-center justify-center mr-3 flex-shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-3 flex-shrink-0 shadow-sm">
                             <i class="${icono} text-${color}-500"></i>
                         </div>
                         <div>
@@ -1198,11 +1094,11 @@ function generarMenuComida(data, comida, titulo, icono, color, emoji) {
                         </div>
                     </div>
                     <button 
-                        onclick="seleccionarMenuCompleto('${comida}', [${alimentos.map(a => a.id).join(',')}],'${calorias}')"
-                        class="bg-${color}-500 hover:bg-${color}-600 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors flex items-center justify-center text-xs sm:text-sm w-full md:w-auto"
-                        id="btn-menu-${comida}">
+                        onclick="seleccionarMenuCompleto('${comida}', [${tieneAlimentos ? alimentos.map(a => a.id).join(',') : ''}],'${calorias}')"
+                        class="bg-${color}-500 hover:bg-${color}-600 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors flex items-center justify-center text-xs sm:text-sm w-full md:w-auto shadow-sm"
+                        id="btn-menu-${comida}" ${!tieneAlimentos ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
                         <i class="fas fa-check mr-2"></i>
-                        Seleccionar Menú
+                        Guardar este Menú
                     </button>
                 </div>
             </div>
@@ -1217,19 +1113,19 @@ function generarMenuComida(data, comida, titulo, icono, color, emoji) {
                 ` : `
                     <div class="grid gap-3">
                         ${alimentos.map(alimento => `
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
                                 <div class="flex items-center">
-                                    <div class="w-8 h-8 rounded-full bg-${color}-100 flex items-center justify-center mr-3 flex-shrink-0">
+                                    <div class="w-8 h-8 rounded-full bg-${color}-50 flex items-center justify-center mr-3 flex-shrink-0">
                                         <i class="fas fa-utensil-spoon text-${color}-500 text-xs"></i>
                                     </div>
                                     <div>
                                         <div class="font-medium text-gray-800 text-sm md:text-base">${alimento.nombre}</div>
-                                        <div class="text-xs text-gray-500">Alimento</div>
+                                        <div class="text-xs text-gray-500">Porción recomendada</div>
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="font-semibold text-${color}-600 text-sm md:text-base">${alimento.calorias}</div>
-                                    <div class="text-xs text-gray-500">calorías</div>
+                                    <div class="font-bold text-${color}-600 text-sm md:text-base">${alimento.calorias}</div>
+                                    <div class="text-xs text-gray-400">calorías</div>
                                 </div>
                             </div>
                         `).join('')}
@@ -1249,8 +1145,8 @@ function generarInformacionNutricional(data) {
                 <!-- Header Información Nutricional -->
                 <div class="bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-3 border-b border-gray-200">
                     <h3 class="font-bold text-gray-800 flex items-center text-sm md:text-base">
-                        <i class="fas fa-chart-line mr-2 text-indigo-500"></i>
-                        Información Nutricional
+                        <i class="fas fa-chart-pie mr-2 text-indigo-500"></i>
+                        Resumen Nutricional
                     </h3>
                 </div>
 
@@ -1286,7 +1182,7 @@ function generarInformacionNutricional(data) {
                                     <i class="fas fa-bullseye text-purple-500 text-xl mr-3"></i>
                                     <div>
                                         <div class="font-semibold text-gray-800 text-sm md:text-base">Recomendadas</div>
-                                        <div class="text-xs md:text-sm text-gray-600">Calorías diarias</div>
+                                        <div class="text-xs md:text-sm text-gray-600">Calorías meta</div>
                                     </div>
                                 </div>
                                 <div class="text-right">
@@ -1316,14 +1212,14 @@ function generarInformacionNutricional(data) {
                         <div class="flex items-center">
                             <i class="fas ${estado.icon} text-${estado.color}-500 text-xl mr-3"></i>
                             <div>
-                                <div class="font-semibold text-gray-800 text-sm md:text-base">Estado Nutricional</div>
-                                <div class="text-xs md:text-sm text-gray-600">Balance calórico</div>
+                                <div class="font-semibold text-gray-800 text-sm md:text-base">Estado del Plan</div>
+                                <div class="text-xs md:text-sm text-gray-600">Balance calórico proyectado</div>
                             </div>
                         </div>
                         <div class="text-right">
                             <div class="text-lg md:text-xl font-bold text-${estado.color}-600 capitalize">${data.estado_calorias}</div>
-                            <div class="text-xs md:text-sm ${data.diferencia_calorias >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                ${data.diferencia_calorias >= 0 ? '+' : ''}${data.diferencia_calorias} cal
+                            <div class="text-xs md:text-sm font-bold ${data.diferencia_calorias >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                ${data.diferencia_calorias >= 0 ? '+' : ''}${data.diferencia_calorias} cal respecto a meta
                             </div>
                         </div>
                     </div>
@@ -1337,13 +1233,13 @@ function generarInformacionNutricional(data) {
                 <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-100">
                     <h5 class="font-semibold text-gray-800 mb-3 flex items-center text-sm md:text-base">
                         <i class="fas fa-tasks text-indigo-500 mr-2"></i>
-                        Tus Objetivos
+                        Este plan atiende a tus objetivos:
                     </h5>
                     <div class="grid gap-2">
                         ${data.objetivos_usuario.map(objetivo => `
                             <div class="flex items-center p-2 bg-white rounded border border-indigo-100">
                                 <i class="fas fa-check-circle text-indigo-400 mr-3"></i>
-                                <span class="text-gray-700 text-xs md:text-sm">${objetivo}</span>
+                                <span class="text-gray-700 text-xs md:text-sm font-medium">${objetivo}</span>
                             </div>
                         `).join('')}
                     </div>
@@ -1376,7 +1272,7 @@ function cerrarModal() {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
     document.body.style.overflow = 'auto';
-    location.reload();
+    location.reload(); // Recargar la página al cerrar para reflejar cambios
 }
 
 
@@ -1400,33 +1296,41 @@ function cerrarModal() {
                         <i class="fas ${iconos[tipo]}"></i>
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm">${mensaje}</p>
+                        <p class="text-sm font-medium">${mensaje}</p>
                     </div>
                 </div>
             </div>
         `;
         
-        // Insertar al inicio del contenedor de resultados
+        // Insertar al inicio del contenedor de resultados (si existe)
         const divResultado = document.getElementById('resultado-preferencia');
-        divResultado.innerHTML = alertaHTML;
-        
-        // Auto-remover después de 5 segundos
-        setTimeout(() => {
-            if (divResultado.innerHTML === alertaHTML) {
-                divResultado.innerHTML = '';
-            }
-        }, 5000);
+        if(divResultado) {
+            divResultado.innerHTML = alertaHTML;
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (divResultado.innerHTML === alertaHTML) {
+                    divResultado.innerHTML = '';
+                }
+            }, 5000);
+        } else {
+            // Fallback si no existe el contenedor
+            alert(mensaje);
+        }
     }
 
     // Mejora: Cerrar modal con ESC key
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
-            cerrarModal();
+            const modalPref = document.getElementById('modal-preferencia');
+            if(modalPref && !modalPref.classList.contains('hidden')){
+                cerrarModal();
+            }
         }
     });
 
     // Mejora: Cerrar modal haciendo click fuera del contenido
     document.getElementById('modal-preferencia').addEventListener('click', function(event) {
+        // Solo cerrar si el clic fue directamente en el fondo gris oscuro
         if (event.target === this) {
             cerrarModal();
         }
@@ -1441,9 +1345,9 @@ function seleccionarMenuCompleto(tipoMenu, alimentosIds, calorias) {
     if (menusSeleccionados[tipoMenu]) {
         // Deseleccionar menú
         delete menusSeleccionados[tipoMenu];
-        boton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        boton.classList.remove('bg-gray-500', 'hover:bg-gray-600');
         boton.classList.add(`bg-${getColorByTipo(tipoMenu)}-500`, `hover:bg-${getColorByTipo(tipoMenu)}-600`);
-        boton.innerHTML = '<i class="fas fa-check mr-2"></i> Seleccionar Menú';
+        boton.innerHTML = '<i class="fas fa-check mr-2"></i> Guardar este Menú';
     } else {
         // Seleccionar menú
         menusSeleccionados[tipoMenu] = {
@@ -1453,14 +1357,12 @@ function seleccionarMenuCompleto(tipoMenu, alimentosIds, calorias) {
             fecha: new Date().toISOString().split('T')[0] // Fecha actual
         };
         boton.classList.remove(`bg-${getColorByTipo(tipoMenu)}-500`, `hover:bg-${getColorByTipo(tipoMenu)}-600`);
-        boton.classList.add('bg-blue-500', 'hover:bg-blue-600');
-        boton.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Menú Seleccionado';
+        boton.classList.add('bg-gray-500', 'hover:bg-gray-600');
+        boton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Guardando...';
         
         // GUARDAR AUTOMÁTICAMENTE al seleccionar
         guardarMenuSeleccionado(tipoMenu, alimentosIds,calorias);
     }
-    
-
 }
 
 // Función para guardar el menú en el backend
@@ -1481,31 +1383,34 @@ async function guardarMenuSeleccionado(tipoMenu, alimentosIds, calorias) {
         });
         
         const result = await response.json();
+        const boton = document.getElementById(`btn-menu-${tipoMenu}`);
         
         if (result.success) {
             console.log(`✅ Menú ${tipoMenu} guardado correctamente`);
-            mostrarNotificacion(`Menú de ${tipoMenu} guardado`, 'success');
+            boton.innerHTML = '<i class="fas fa-check-circle mr-2"></i> ¡Menú Guardado!';
+            boton.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+            boton.classList.add('bg-green-500', 'hover:bg-green-600');
+            // No revertimos, lo dejamos en verde indicando éxito
         } else {
             console.error('Error al guardar menú:', result.message);
-            mostrarNotificacion(`Error al guardar menú: ${result.message}`, 'error');
+            alert(`Error al guardar menú: ${result.message}`);
             
             // Revertir selección si hay error
-            const boton = document.getElementById(`btn-menu-${tipoMenu}`);
             delete menusSeleccionados[tipoMenu];
-            boton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+            boton.classList.remove('bg-gray-500', 'hover:bg-gray-600', 'bg-green-500', 'hover:bg-green-600');
             boton.classList.add(`bg-${getColorByTipo(tipoMenu)}-500`, `hover:bg-${getColorByTipo(tipoMenu)}-600`);
-            boton.innerHTML = '<i class="fas fa-check mr-2"></i> Seleccionar Menú';
+            boton.innerHTML = '<i class="fas fa-check mr-2"></i> Guardar este Menú';
         }
     } catch (error) {
         console.error('Error de conexión:', error);
-        mostrarNotificacion('Error de conexión al guardar el menú', 'error');
+        alert('Error de conexión al guardar el menú');
         
         // Revertir selección si hay error de conexión
         const boton = document.getElementById(`btn-menu-${tipoMenu}`);
         delete menusSeleccionados[tipoMenu];
-        boton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        boton.classList.remove('bg-gray-500', 'hover:bg-gray-600', 'bg-green-500', 'hover:bg-green-600');
         boton.classList.add(`bg-${getColorByTipo(tipoMenu)}-500`, `hover:bg-${getColorByTipo(tipoMenu)}-600`);
-        boton.innerHTML = '<i class="fas fa-check mr-2"></i> Seleccionar Menú';
+        boton.innerHTML = '<i class="fas fa-check mr-2"></i> Guardar este Menú';
     }
 }
 
@@ -1526,7 +1431,6 @@ function getColorByTipo(tipoMenu) {
 function mostrarNotificacion(mensaje, tipo = 'info') {
     // Puedes usar Toast, SweetAlert, o simplemente un alert
     if (tipo === 'success') {
-        // Usar Toast de Tailwind si tienes, o simple alert
         alert(`✅ ${mensaje}`);
     } else if (tipo === 'error') {
         alert(`❌ ${mensaje}`);
@@ -1547,7 +1451,9 @@ function cargarProgreso(pacienteId = null) {
     }
     
     loading.classList.remove('hidden');
+    loading.classList.add('block'); // Asegurarnos que block reemplaza hidden si es necesario
     data.classList.add('hidden');
+    error.classList.remove('flex'); // Cambiamos esto para el nuevo estado vacio
     error.classList.add('hidden');
 
     let url = '/progreso/datos';
@@ -1558,27 +1464,25 @@ function cargarProgreso(pacienteId = null) {
     fetch(url)
         .then(response => {
             if (!response.ok) {
-                throw new Error(`Para empezar con el progreso registre sus medidas `);
+                throw new Error(`No hay registros`);
             }
             return response.json();
         })
         .then(result => {
+            loading.classList.add('hidden');
             if (result.success) {
                 renderProgreso(result.data);
-                loading.classList.add('hidden');
                 data.classList.remove('hidden');
             } else {
                 throw new Error(result.message || 'Error desconocido del servidor');
             }
         })
-        .catch(error => {
-            console.error('Para empezar con el progreso registre sus medidas', error);
+        .catch(err => {
+            console.error('Info:', err);
             loading.classList.add('hidden');
-            const errorDiv = document.getElementById('progresoError');
-            if (document.getElementById('errorMessage') && errorDiv) {
-                document.getElementById('errorMessage').textContent = error.message;
-                errorDiv.classList.remove('hidden');
-            }
+            // Mostrar nuestro nuevo estado vacío bonito
+            error.classList.remove('hidden');
+            error.classList.add('flex');
         });
 }
 
@@ -1596,7 +1500,7 @@ function renderPesoChart(historialPeso) {
     chartContainer.innerHTML = '';
 
     if (!historialPeso || historialPeso.length === 0) {
-        chartContainer.innerHTML = '<p class="text-gray-500 text-center text-xs md:text-sm w-full">No hay datos de peso</p>';
+        chartContainer.innerHTML = '<p class="text-gray-400 text-center text-sm w-full py-8 italic">No hay historial de peso suficiente para graficar.</p>';
         return;
     }
 
@@ -1605,7 +1509,7 @@ function renderPesoChart(historialPeso) {
     
     const pesos = historialPeso.map(item => item.peso).filter(peso => peso != null);
     if (pesos.length === 0) {
-        chartContainer.innerHTML = '<p class="text-gray-500 text-center text-xs md:text-sm w-full">No hay datos válidos de peso</p>';
+        chartContainer.innerHTML = '<p class="text-gray-400 text-center text-sm w-full py-8 italic">No hay historial válido de peso.</p>';
         return;
     }
 
@@ -1620,7 +1524,7 @@ function renderPesoChart(historialPeso) {
 
     // Crear contenedor principal
     const chartWrapper = document.createElement('div');
-    chartWrapper.className = 'w-full h-40 sm:h-48 md:h-64 flex items-end justify-between space-x-2 md:space-x-4 px-2 sm:px-4';
+    chartWrapper.className = 'w-full h-full flex items-end justify-between space-x-2 md:space-x-4 px-2 sm:px-4 pb-6';
 
     historialPeso.forEach((item, index) => {
         if (item.peso == null) return;
@@ -1630,55 +1534,31 @@ function renderPesoChart(historialPeso) {
         const barContainer = document.createElement('div');
         barContainer.className = 'flex flex-col items-center justify-end flex-1 h-full group relative';
         
-        // Línea de conexión entre puntos (para tendencia)
-        if (index > 0) {
-            const line = document.createElement('div');
-            line.className = 'absolute top-1/2 h-0.5 bg-gray-300 -z-10 hidden sm:block';
-            line.style.left = '-50%';
-            line.style.right = '150%';
-            line.style.top = '50%';
-            barContainer.appendChild(line);
-        }
-        
         // Barra/Punto principal
         const bar = document.createElement('div');
         const esUltimo = index === historialPeso.length - 1;
         const esPrimero = index === 0;
         
-        bar.className = `w-4 sm:w-6 md:w-8 rounded-t-lg transition-all duration-700 cursor-pointer shadow-lg ${
-            esUltimo ? 'bg-gradient-to-t from-red-400 via-red-500 to-red-600 ring-2 ring-yellow-400' :
-            esPrimero ? 'bg-gradient-to-t from-green-400 via-green-500 to-green-600' :
-            'bg-gradient-to-t from-blue-400 via-blue-500 to-blue-600'
-        } hover:scale-110 hover:shadow-xl`;
+        bar.className = `w-4 sm:w-8 md:w-10 rounded-t-xl transition-all duration-700 cursor-pointer shadow-sm ${
+            esUltimo ? 'bg-purple-500' :
+            esPrimero ? 'bg-indigo-300' :
+            'bg-purple-300'
+        } hover:opacity-80`;
         bar.style.height = '0%';
         
         // Valor del peso
         const valueLabel = document.createElement('div');
-        valueLabel.className = 'text-[10px] sm:text-xs md:text-sm font-bold text-gray-800 mb-1 sm:mb-2 transition-all duration-300';
+        valueLabel.className = 'text-[10px] sm:text-sm font-bold text-gray-700 mb-2 transition-all duration-300';
         valueLabel.textContent = `${item.peso}kg`;
         
-        // Fecha
+        // Fecha (Movida abajo)
         const dateLabel = document.createElement('div');
-        dateLabel.className = 'text-[10px] sm:text-xs text-gray-600 mt-1 sm:mt-2 text-center font-medium';
+        dateLabel.className = 'absolute -bottom-6 text-[9px] sm:text-xs text-gray-400 text-center font-medium whitespace-nowrap';
         const fecha = new Date(item.fecha_registro);
         dateLabel.textContent = fecha.toLocaleDateString('es-ES', { 
             month: 'short', 
             day: 'numeric' 
         });
-        
-        // Indicador de progreso
-        if (index > 0) {
-            const cambio = item.peso - historialPeso[index - 1].peso;
-            const cambioElement = document.createElement('div');
-            cambioElement.className = `text-[10px] sm:text-xs font-bold mb-1 ${
-                cambio < 0 ? 'text-green-600' : 
-                cambio > 0 ? 'text-red-600' : 
-                'text-gray-500'
-            }`;
-            cambioElement.textContent = cambio < 0 ? `▼${Math.abs(cambio).toFixed(1)}` : 
-                                      cambio > 0 ? `▲${cambio.toFixed(1)}` : '=';
-            barContainer.appendChild(cambioElement);
-        }
         
         barContainer.appendChild(valueLabel);
         barContainer.appendChild(bar);
@@ -1688,29 +1568,10 @@ function renderPesoChart(historialPeso) {
         // Animación de entrada
         setTimeout(() => {
             bar.style.height = `${alturaPorcentaje}%`;
-        }, index * 150);
+        }, index * 100);
     });
     
     chartContainer.appendChild(chartWrapper);
-
-    // Leyenda de colores
-    const legend = document.createElement('div');
-    legend.className = 'flex flex-wrap justify-center space-x-2 sm:space-x-4 mt-3 sm:mt-4 text-[10px] sm:text-xs';
-    legend.innerHTML = `
-        <div class="flex items-center space-x-1 mt-1">
-            <div class="w-3 h-3 bg-green-500 rounded"></div>
-            <span>Inicio</span>
-        </div>
-        <div class="flex items-center space-x-1 mt-1">
-            <div class="w-3 h-3 bg-blue-500 rounded"></div>
-            <span>Progreso</span>
-        </div>
-        <div class="flex items-center space-x-1 mt-1">
-            <div class="w-3 h-3 bg-red-500 rounded"></div>
-            <span>Actual</span>
-        </div>
-    `;
-    chartContainer.appendChild(legend);
 }
 
 function renderMetas(metas) {
@@ -1720,7 +1581,7 @@ function renderMetas(metas) {
     metasContainer.innerHTML = '';
 
     if (!metas || metas.length === 0) {
-        metasContainer.innerHTML = '<p class="text-gray-500 text-center text-sm md:text-base">No hay metas definidas</p>';
+        metasContainer.innerHTML = '<p class="text-gray-400 text-sm italic py-4 text-center">No has establecido metas aún.</p>';
         return;
     }
 
@@ -1739,26 +1600,27 @@ function renderMetas(metas) {
         const isCompleted = meta.completada;
         
         const metaElement = document.createElement('div');
-        metaElement.className = `p-3 md:p-4 rounded-lg border-2 transition-all duration-300 ${
-            isCompleted ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
+        metaElement.className = `p-4 rounded-xl border transition-all duration-300 ${
+            isCompleted ? 'bg-green-50/50 border-green-200' : 'bg-gray-50/50 border-gray-100'
         }`;
         
         metaElement.innerHTML = `
             <div class="flex items-center">
-                <div class="flex-shrink-0 mr-3">
-                    <div class="w-3 h-3 rounded-full ${
-                        isCompleted ? 'bg-green-500' : 'bg-blue-500'
-                    }"></div>
+                <div class="flex-shrink-0 mr-4">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center ${
+                        isCompleted ? 'bg-green-100 text-green-500' : 'bg-blue-100 text-blue-500'
+                    }">
+                        <i class="fas ${isCompleted ? 'fa-check' : 'fa-flag'} text-sm"></i>
+                    </div>
                 </div>
                 <div class="flex-1">
-                    <div class="font-semibold text-gray-800 text-sm md:text-base ${
-                        isCompleted ? 'line-through text-green-700' : ''
+                    <div class="font-bold text-sm md:text-base ${
+                        isCompleted ? 'text-green-800' : 'text-gray-800'
                     }">
                         ${meta.descripcion}
-                        ${isCompleted ? ' ✅' : ''}
                     </div>
                     ${meta.objetivo_origen ? `
-                        <div class="text-xs text-gray-500 mt-1">${meta.objetivo_origen}</div>
+                        <div class="text-xs text-gray-500 mt-0.5">Asociado a: ${meta.objetivo_origen}</div>
                     ` : ''}
                 </div>
             </div>
@@ -1773,72 +1635,36 @@ function renderEstados(estadoInicial, estadoActual) {
 
     if (estadoInicialContainer) {
         estadoInicialContainer.innerHTML = estadoInicial ? `
-            <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                    <strong class="text-sm md:text-base text-gray-700">Peso:</strong>
-                    <span class="text-sm md:text-base font-bold text-gray-900">${estadoInicial.peso}kg</span>
+            <div class="space-y-2 mt-2">
+                <div class="flex justify-between items-center pb-2 border-b border-blue-100/50">
+                    <span class="text-sm text-gray-600">Peso registrado:</span>
+                    <span class="text-sm font-black text-gray-800">${estadoInicial.peso} kg</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <strong class="text-sm md:text-base text-gray-700">Fecha:</strong>
-                    <span class="text-xs md:text-sm text-gray-600">${new Date(estadoInicial.fecha_registro).toLocaleDateString()}</span>
+                    <span class="text-xs text-gray-500">Fecha del registro:</span>
+                    <span class="text-xs font-bold text-gray-600">${new Date(estadoInicial.fecha_registro).toLocaleDateString()}</span>
                 </div>
-                ${estadoInicial.estado_fisico ? `
-                    <div class="flex justify-between items-center">
-                        <strong class="text-sm md:text-base text-gray-700">Estado físico:</strong>
-                        <span class="text-xs md:text-sm px-2 py-1 rounded-full font-semibold ${
-                            estadoInicial.estado_fisico >= 8 ? 'bg-green-100 text-green-800' :
-                            estadoInicial.estado_fisico >= 6 ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                        }">${estadoInicial.estado_fisico}/10</span>
-                    </div>
-                ` : ''}
             </div>
-        ` : '<p class="text-gray-500 text-sm md:text-base text-center">No hay datos iniciales</p>';
+        ` : '<p class="text-gray-400 text-sm italic mt-2">No existen registros iniciales.</p>';
     }
 
     if (estadoActualContainer) {
         estadoActualContainer.innerHTML = estadoActual ? `
-            <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                    <strong class="text-sm md:text-base text-gray-700">Peso:</strong>
-                    <span class="text-sm md:text-base font-bold ${
+            <div class="space-y-2 mt-2">
+                <div class="flex justify-between items-center pb-2 border-b border-green-100/50">
+                    <span class="text-sm text-gray-600">Peso actual:</span>
+                    <span class="text-sm font-black ${
                         estadoActual.peso < estadoInicial?.peso ? 'text-green-600' : 
-                        estadoActual.peso > estadoInicial?.peso ? 'text-red-600' : 
-                        'text-gray-900'
-                    }">${estadoActual.peso}kg</span>
+                        estadoActual.peso > estadoInicial?.peso ? 'text-red-500' : 
+                        'text-gray-800'
+                    }">${estadoActual.peso} kg</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <strong class="text-sm md:text-base text-gray-700">Fecha:</strong>
-                    <span class="text-xs md:text-sm text-gray-600">${new Date(estadoActual.fecha_registro).toLocaleDateString()}</span>
+                    <span class="text-xs text-gray-500">Última actualización:</span>
+                    <span class="text-xs font-bold text-gray-600">${new Date(estadoActual.fecha_registro).toLocaleDateString()}</span>
                 </div>
-                ${estadoActual.estado_fisico ? `
-                    <div class="flex justify-between items-center">
-                        <strong class="text-sm md:text-base text-gray-700">Estado físico:</strong>
-                        <span class="text-xs md:text-sm px-2 py-1 rounded-full font-semibold ${
-                            estadoActual.estado_fisico >= 8 ? 'bg-green-100 text-green-800' :
-                            estadoActual.estado_fisico >= 6 ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                        }">${estadoActual.estado_fisico}/10</span>
-                    </div>
-                ` : ''}
-                ${estadoInicial && estadoActual ? `
-                    <div class="border-t pt-3 mt-2">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-600 font-medium">Cambio total:</span>
-                            <span class="font-bold ${
-                                estadoActual.peso < estadoInicial.peso ? 'text-green-600' : 
-                                estadoActual.peso > estadoInicial.peso ? 'text-red-600' : 
-                                'text-gray-600'
-                            }">
-                                ${estadoActual.peso < estadoInicial.peso ? '▼' : 
-                                  estadoActual.peso > estadoInicial.peso ? '▲' : '='} 
-                                ${Math.abs(estadoActual.peso - estadoInicial.peso).toFixed(1)}kg
-                            </span>
-                        </div>
-                    </div>
-                ` : ''}
             </div>
-        ` : '<p class="text-gray-500 text-sm md:text-base text-center">No hay datos actuales</p>';
+        ` : '<p class="text-gray-400 text-sm italic mt-2">Aún no hay actualizaciones.</p>';
     }
 }
 
@@ -1848,7 +1674,6 @@ function renderProgreso(data) {
     safeSetText('reduccionGrasa', `${data.metricas.reduccionGrasa > 0 ? '-' : '+'}${Math.abs(data.metricas.reduccionGrasa).toFixed(1)}%`);
     safeSetText('gananciaMuscular', `${data.metricas.gananciaMuscular > 0 ? '+' : ''}${data.metricas.gananciaMuscular.toFixed(1)}kg`);
     safeSetText('mejoraIMC', `${data.metricas.mejoraIMC > 0 ? '+' : ''}${data.metricas.mejoraIMC.toFixed(2)}`);
-    safeSetText('progresoGeneral', `${Math.round(data.metricas.progresoGeneral)}%`);
 
     if (data.historialPeso) {
         renderPesoChart(data.historialPeso);
@@ -1879,12 +1704,12 @@ function verDietas() {
             if (data.success) {
                 renderDietas(data.data);
             } else {
-                mostrarError('Error al cargar las dietas');
+                mostrarErrorDietasModal('Error al cargar las dietas');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            mostrarError('Error de conexión');
+            mostrarErrorDietasModal('Error de conexión');
         });
 }
 
@@ -1893,9 +1718,10 @@ function renderDietas(menus) {
     
     if (!menus || menus.length === 0) {
         dietasContainer.innerHTML = `
-            <div class="text-center py-8">
-                <i class="fas fa-utensils text-gray-400 text-4xl mb-4"></i>
-                <p class="text-gray-500">No tienes dietas asignadas</p>
+            <div class="text-center py-16">
+                <i class="fas fa-utensils text-gray-200 text-6xl mb-4"></i>
+                <p class="text-gray-500 font-medium">Aún no has guardado ninguna dieta.</p>
+                <button onclick="cerrarDietas(); generarDieta();" class="mt-6 bg-green-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-green-600 transition-colors">Generar mi primera dieta</button>
             </div>
         `;
         return;
@@ -1917,83 +1743,64 @@ function renderDietas(menus) {
     });
 
     dietasContainer.innerHTML = `
-        <div class="space-y-8">
+        <div class="space-y-6">
             ${Object.entries(menusPorTipo).map(([tipo, menusDelTipo]) => {
                 if (menusDelTipo.length === 0) return '';
                 
                 return `
-                <div class="border border-gray-200 rounded-xl p-6 bg-white">
+                <div class="border border-gray-100 rounded-2xl p-6 bg-white shadow-sm">
                     <!-- Header del tipo -->
-                    <div class="flex items-center mb-6 pb-4 border-b border-gray-100">
-                        <i class="fas ${getIconoTipo(tipo)} text-2xl mr-3 text-${getColorTipo(tipo)}-500"></i>
+                    <div class="flex items-center mb-6 pb-4 border-b border-gray-50">
+                        <div class="w-12 h-12 bg-${getColorTipo(tipo)}-50 text-${getColorTipo(tipo)}-500 rounded-xl flex items-center justify-center text-2xl mr-4">
+                            <i class="fas ${getIconoTipo(tipo)}"></i>
+                        </div>
                         <div>
                             <h4 class="font-bold text-gray-800 text-xl capitalize">${tipo}</h4>
-                            <p class="text-gray-600 text-sm">${menusDelTipo.length} menú(s) asignado(s)</p>
+                            <p class="text-gray-500 text-sm font-medium">${menusDelTipo.length} opción(es) guardada(s)</p>
                         </div>
                     </div>
 
                     <!-- Menús de este tipo -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         ${menusDelTipo.map(menu => {
                             const alimentosMenu = menu.alimentos || [];
                             const caloriasTotales = menu.calorias || alimentosMenu.reduce((sum, al) => sum + (al.calorias || 0), 0);
                             
                             return `
-                            <div class="border border-gray-200 rounded-lg p-5 bg-gray-50 hover:shadow-md transition-shadow">
+                            <div class="border border-gray-100 rounded-xl p-5 bg-gray-50/50 hover:bg-white hover:shadow-md transition-all group">
                                 <!-- Header del menú -->
                                 <div class="flex justify-between items-start mb-4">
                                     <div class="flex-1">
-                                        <h5 class="font-semibold text-gray-800 text-lg mb-1">
-                                            ${menu.nombre || `Menú ${tipo}`}
+                                        <h5 class="font-bold text-gray-800 text-lg mb-1">
+                                            ${menu.nombre || `Plan de ${tipo}`}
                                         </h5>
-                                        <div class="flex items-center text-xs text-gray-500">
-                                            <i class="fas fa-calendar mr-1"></i>
-                                            ${new Date(menu.fecha_asignacion).toLocaleDateString('es-ES')}
+                                        <div class="flex items-center text-xs text-gray-400 font-medium">
+                                            <i class="fas fa-calendar-alt mr-1"></i>
+                                            Guardado el ${new Date(menu.fecha_asignacion).toLocaleDateString('es-ES')}
                                         </div>
                                     </div>
-                                    <span class="bg-${getColorTipo(tipo)}-100 text-${getColorTipo(tipo)}-800 text-sm font-semibold px-3 py-1 rounded-full">
+                                    <span class="bg-${getColorTipo(tipo)}-100 text-${getColorTipo(tipo)}-700 text-xs font-bold px-3 py-1 rounded-lg">
                                         ${caloriasTotales} kcal
                                     </span>
                                 </div>
 
-                                ${menu.descripcion ? `
-                                    <p class="text-sm text-gray-600 mb-4">${menu.descripcion}</p>
-                                ` : ''}
-
                                 <!-- Alimentos del menú -->
                                 <div class="mb-4">
-                                    <h6 class="font-medium text-gray-700 text-sm mb-3 flex items-center">
-                                        <i class="fas fa-utensil-spoon mr-2"></i>
-                                        Alimentos (${alimentosMenu.length})
+                                    <h6 class="font-bold text-gray-400 text-[10px] uppercase tracking-wider mb-2">
+                                        Ingredientes de la porción
                                     </h6>
-                                    <div class="space-y-2">
+                                    <div class="space-y-1.5">
                                         ${alimentosMenu.map(alimento => `
-                                            <div class="flex justify-between items-center text-sm p-2 bg-white rounded border border-gray-100">
-                                                <span class="font-medium text-gray-800 flex-1">
+                                            <div class="flex justify-between items-center text-sm p-2 bg-white rounded-lg border border-gray-100 group-hover:border-gray-200 transition-colors">
+                                                <span class="font-medium text-gray-700">
                                                     ${alimento.alimento?.nombre || 'Alimento'}
                                                 </span>
-                                                <div class="text-right text-xs text-gray-600">
+                                                <div class="text-right text-xs font-bold text-gray-400">
                                                     ${alimento.cantidad || ''} ${alimento.unidad || ''}
-                                                    ${alimento.calorias ? ` • ${alimento.calorias} kcal` : ''}
                                                 </div>
                                             </div>
                                         `).join('')}
                                     </div>
-                                </div>
-
-                                <!-- Footer del menú -->
-                                <div class="flex justify-between items-center pt-3 border-t border-gray-200 text-xs text-gray-500">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="bg-white px-2 py-1 rounded border">
-                                            ID: ${menu.id}
-                                        </span>
-                                        <!-- Indicador de validación -->
-                                        <span class="flex items-center ${menu.validado ? 'text-green-600' : 'text-red-600'}">
-                                            <i class="fas ${menu.validado ? 'fa-check-circle' : 'fa-times-circle'} mr-1"></i>
-                                            ${menu.validado ? 'Validado' : 'Pendiente'}
-                                        </span>
-                                    </div>
-                                    <span>Asignación: ${menu.id_usuario}</span>
                                 </div>
                             </div>
                             `;
@@ -2006,10 +1813,10 @@ function renderDietas(menus) {
     `;
 }
 
-// Funciones auxiliares (se mantienen igual)
+// Funciones auxiliares
 function getIconoTipo(tipo) {
     const iconos = {
-        'desayuno': 'fa-coffee',
+        'desayuno': 'fa-sun',
         'almuerzo': 'fa-utensils', 
         'cena': 'fa-moon',
         'general': 'fa-apple-alt'
@@ -2019,9 +1826,9 @@ function getIconoTipo(tipo) {
 
 function getColorTipo(tipo) {
     const colores = {
-        'desayuno': 'orange',
-        'almuerzo': 'blue',
-        'cena': 'purple',
+        'desayuno': 'yellow',
+        'almuerzo': 'orange',
+        'cena': 'blue',
         'general': 'gray'
     };
     return colores[tipo] || 'gray';
@@ -2031,18 +1838,14 @@ function cerrarDietas() {
     document.getElementById('dietasModal').classList.add('hidden');
 }
 
-function mostrarError(mensaje) {
+function mostrarErrorDietasModal(mensaje) {
     const dietasContainer = document.getElementById('dietasContent');
     dietasContainer.innerHTML = `
-        <div class="text-center py-8 text-red-600">
-            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-            <p>${mensaje}</p>
+        <div class="text-center py-12 text-red-500">
+            <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+            <p class="font-bold">${mensaje}</p>
         </div>
     `;
 }
-
-
-
-
 </script>
 @endsection

@@ -29,7 +29,7 @@
                 </button>
             </div>
 
-            <!-- MODAL 1: Ver mis datos -->
+           <!-- MODAL 1: Ver mis datos -->
             <div id="datosModal" class="fixed inset-0 z-50 hidden">
                 <div class="modal-backdrop fixed inset-0" onclick="closeModal('datosModal')"></div>
                 <div class="fixed inset-0 flex items-center justify-center p-4">
@@ -43,53 +43,65 @@
                                     </svg>
                                     Mis Datos Personales
                                 </h3>
-                                <button onclick="closeModal('datosModal')" class="text-gray-500 hover:text-gray-700">
+                                <button type="button" onclick="closeModal('datosModal')" class="text-gray-500 hover:text-gray-700">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
                                 </button>
                             </div>
 
-                            <!-- Contenido -->
-                            <div class="space-y-4">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <div class="block text-sm font-medium text-gray-700 mb-1">Nombre</div>
-                                        <p class="input-neu bg-gray-50">{{ Auth::user()->nombre }}</p>
-                                    </div>
-                                </div>
+                            <!-- EL FORMULARIO COMIENZA AQUÍ -->
+                            <form action="{{ route('cuenta.update') }}" method="POST">
+                                @csrf
+                                @method('PUT')
                                 
-                                <div>
+                                <div class="space-y-4">
+                                    <!-- Campo Nombre con validación -->
                                     <div>
-                                        <div class="block text-sm font-medium text-gray-700 mb-1">Email</div>
-                                        <p class="input-neu bg-gray-50">{{ Auth::user()->email }}</p>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                                        <input type="text" name="nombre" class="input-neu w-full @error('nombre') border-red-500 @enderror" value="{{ old('nombre', Auth::user()->nombre) }}" required>
+                                        <!-- Mensaje de error rojo -->
+                                        @error('nombre')
+                                            <p class="text-red-500 text-xs mt-1 font-semibold">⚠️ {{ $message }}</p>
+                                        @enderror
                                     </div>
-                                </div>
-                                
-                                <div>
+                                    
+                                    <!-- Campo Email con validación -->
                                     <div>
-                                        <div class="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento</div>
-                                        <p class="input-neu bg-gray-50">{{ Auth::user()->fecha_nacimiento }}</p>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                        <input type="email" name="email" class="input-neu w-full @error('email') border-red-500 @enderror" value="{{ old('email', Auth::user()->email) }}" required>
+                                        <!-- Mensaje de error rojo -->
+                                        @error('email')
+                                            <p class="text-red-500 text-xs mt-1 font-semibold">⚠️ {{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    
+                                    <!-- Campo Fecha de nacimiento -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento</label>
+                                        <input type="date" name="fecha_nacimiento" class="input-neu w-full @error('fecha_nacimiento') border-red-500 @enderror" value="{{ old('fecha_nacimiento', Auth::user()->fecha_nacimiento) }}" required>
+                                        @error('fecha_nacimiento')
+                                            <p class="text-red-500 text-xs mt-1 font-semibold">⚠️ {{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de registro</label>
+                                        <!-- La fecha de registro se queda como párrafo porque no deberían poder editarla -->
+                                        <p class="input-neu bg-gray-50 text-gray-500 cursor-not-allowed">{{ Auth::user()->fecha_registro }}</p>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <div>
-                                        <div class="block text-sm font-medium text-gray-700 mb-1">Fecha de registro</div>
-                                        <p class="input-neu bg-gray-50">{{ Auth::user()->fecha_registro }}</p>
-                                    </div>
+                                <!-- Footer -->
+                                <div class="flex gap-3 mt-6">
+                                    <button type="button" onclick="closeModal('datosModal')" class="btn-neu-secondary flex-1">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" class="btn-neu flex-1">
+                                        Guardar Cambios
+                                    </button>
                                 </div>
-                            </div>
-
-                            <!-- Footer -->
-                            <div class="flex gap-3 mt-6">
-                                <button onclick="closeModal('datosModal')" class="btn-neu-secondary flex-1">
-                                    Cerrar
-                                </button>
-                                <button class="btn-neu flex-1">
-                                    Editar Datos
-                                </button>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -545,6 +557,14 @@
 </div>
 
 <script>
+    // FUNCIONALIDAD EXTRA DE UX PARA MOSTRAR ERRORES
+    @if ($errors->has('nombre') || $errors->has('email') || $errors->has('fecha_nacimiento'))
+        document.addEventListener("DOMContentLoaded", function() {
+            // Si hay un error, abrimos automáticamente el modal de datos para que el usuario vea el mensaje rojo
+            openModal('datosModal');
+        });
+    @endif
+
     // Funciones para controlar modales
     function openModal(modalId) {
         document.getElementById(modalId).classList.remove('hidden');
@@ -680,15 +700,6 @@
             console.log('Method Spoofing:', form.querySelector('input[name="_method"]')?.value);
         }
     }
-
-
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-    }
-
 
 
     // Llama a debug cuando se abra cualquier modal

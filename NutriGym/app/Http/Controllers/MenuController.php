@@ -74,13 +74,13 @@ class MenuController extends Controller
         }
     }
 
-    // Prueba de Gemini con datos de usuario
+   // Prueba de Gemini con datos de usuario
     public function generarDieta()
     {
         try {
             // Verificar autenticación
             if (!auth()->check()) {
-                if ($request->ajax()) {
+                if (request()->ajax()) {
                     return response()->json([
                         'success' => false,
                         'error' => 'Usuario no autenticado'
@@ -171,6 +171,10 @@ class MenuController extends Controller
             }
 
             $prompt .= "\n\nResponde solo con el menú en el formato solicitado.";
+
+            // --- SOLUCIÓN AL ERROR 429 (Límite de velocidad de la API) ---
+            // Le damos 3 segundos de respiro a Gemini entre la primera y la segunda petición
+            sleep(3);
 
             $mensajeGemini = $geminiService->generateContent($prompt);
             

@@ -57,7 +57,7 @@ Route::post('logout', function () {
 Route::get('/cuenta', [MedidaController::class, 'index'])->name('cuenta');
 Route::post('/medidas', [MedidaController::class, 'store'])->name('medidas.store');
 Route::put('/medidas/{medida}', [MedidaController::class, 'update'])->name('medidas.update');
-
+Route::put('/cuenta/actualizar', [ProfileController::class, 'update'])->name('cuenta.update');
 // ==========================================
 // DASHBOARD GENERAL
 // ==========================================
@@ -173,3 +173,25 @@ Route::get('/dashboard/prueba-gemini', [MenuController::class, 'pruebaGemini']);
 Route::get('/dashboard/debug-gemini', [MenuController::class, 'debugGeminiConfig']);
 Route::get('/dashboard/prueba-gemini-usuario/{usuarioId}', [MenuController::class, 'pruebaGeminiUsuario']);
 Route::get('/dashboard/generar-dieta/{usuarioId}', [MenuController::class, 'generarDieta']);
+
+
+
+// ==========================================
+// RUTAS DEL ADMINISTRADOR (MODIFICADAS)
+// ==========================================
+
+// Vista principal del admin
+Route::get('admin', [AdminController::class, 'index'])->name('admin');
+
+// Ruta para procesar el cambio rápido de rol
+Route::put('/admin/usuarios/{id}/rol', [AdminController::class, 'actualizarRol'])->name('admin.actualizar_rol');
+
+// NUEVAS RUTAS CRUD
+Route::post('/admin/usuarios', [AdminController::class, 'store'])->name('admin.usuarios.store'); // Crear
+Route::put('/admin/usuarios/{id}', [AdminController::class, 'update'])->name('admin.usuarios.update'); // Editar
+Route::delete('/admin/usuarios/{id}', [AdminController::class, 'destroy'])->name('admin.usuarios.destroy'); // Eliminar
+
+// Otras vistas de administración
+Route::get('control', function () {
+    return view('admin.control');
+})->name('control');

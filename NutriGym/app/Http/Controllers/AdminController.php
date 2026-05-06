@@ -3,78 +3,73 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
     public function index()
     {
-        // 1. Traemos a los usuarios con su rol actual (tu código original intacto)
         $usuarios = DB::table('usuarios')
             ->join('roles', 'usuarios.id_rol', '=', 'roles.id')
-            ->where('usuarios.id_rol', '!=', 1) // Excluimos al administrador principal (asumo que es el ID 1)
+            ->where('usuarios.id_rol', '!=', 1) 
             ->select(
                 'usuarios.*',
                 'roles.nombre_rol as nombre_rol'
             )
             ->get();
 
-        // 2. NUEVO: Traemos todos los roles disponibles para armar el menú desplegable en la vista
         $roles_disponibles = DB::table('roles')->get();
 
-        // Enviamos ambas variables a tu vista actual
         return view('ui_dashboard.admin', compact('usuarios', 'roles_disponibles'));
     }
 
-    // 3. NUEVO: La función que recibe el formulario para guardar el nuevo rol
     public function actualizarRol(Request $request, $id)
     {
-        // Validamos que el rol enviado sea válido y exista en la tabla roles
         $request->validate([
             'id_rol' => 'required|integer|exists:roles,id'
         ]);
 
-        // Actualizamos el registro en la base de datos
         DB::table('usuarios')
             ->where('id', $id)
             ->update(['id_rol' => $request->id_rol]);
 
-        // Recargamos la página con un mensaje de éxito
         return back()->with('success', 'El rol del usuario ha sido actualizado correctamente.');
     }
 
-    /**
-     * Crea un nuevo usuario en la base de datos
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'nombre' => 'required|string|max:255',
+            'nombre' => 'required|string|max:255|unique:usuarios,nombre',
             'email' => 'required|email|unique:usuarios,email',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:8|confirmed', 
+            'fecha_nacimiento' => 'required|date|before:-18 years', 
             'id_rol' => 'required|integer|exists:roles,id'
+        ], [
+            'nombre.unique' => 'Este nombre de usuario ya está en uso.',
+            'fecha_nacimiento.before' => 'El usuario debe ser mayor de 18 años.',
         ]);
 
         DB::table('usuarios')->insert([
             'nombre' => $request->nombre,
             'email' => $request->email,
-            'password' => Hash::make($request->password), // Encriptamos la contraseña
+            'contrasena' => Hash::make($request->password), 
             'id_rol' => $request->id_rol,
-            'fecha_registro' => now(), // Asumiendo que tienes esta columna
-            'fecha_nacimiento' => $request->fecha_nacimiento ?? '2000-01-01', // Valor por defecto si no lo envían
+            'fecha_registro' => now(), 
+            'fecha_nacimiento' => $request->fecha_nacimiento,
         ]);
 
         return back()->with('success', 'Usuario creado exitosamente.');
     }
 
-    /**
-     * Actualiza la información general de un usuario
-     */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'nombre' => 'required|string|max:255',
-            'email' => 'required|email', // Aquí se podría añadir validación para ignorar el email actual, pero lo mantendremos simple
+            'nombre' => 'required|string|max:255|unique:usuarios,nombre,' . $id,
+            'email' => 'required|email|unique:usuarios,email,' . $id, 
             'id_rol' => 'required|integer|exists:roles,id'
+        ], [
+            'nombre.unique' => 'Este nombre de usuario ya está en uso.',
+            'email.unique' => 'Este correo electrónico ya está registrado por otro usuario.'
         ]);
 
         $datosUpdate = [
@@ -83,9 +78,8 @@ class AdminController extends Controller
             'id_rol' => $request->id_rol,
         ];
 
-        // Si el admin escribió una nueva contraseña, la actualizamos
         if ($request->filled('password')) {
-            $datosUpdate['password'] = Hash::make($request->password);
+            $datosUpdate['contrasena'] = Hash::make($request->password);
         }
 
         DB::table('usuarios')
@@ -95,13 +89,9 @@ class AdminController extends Controller
         return back()->with('success', 'Usuario actualizado correctamente.');
     }
 
-    /**
-     * Elimina un usuario del sistema
-     */
     public function destroy($id)
     {
-        // Validación de seguridad para que el admin no se borre a sí mismo
-        if ($id == 1) { // Asumiendo que el ID 1 es el Super Admin
+        if ($id == 1) { 
             return back()->with('error', 'No puedes eliminar al administrador principal.');
         }
 
@@ -109,6 +99,4 @@ class AdminController extends Controller
 
         return back()->with('success', 'Usuario eliminado permanentemente.');
     }
-
-
 }
