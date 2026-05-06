@@ -7,59 +7,37 @@ use App\Models\Usuario;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 
 class LoginUsuarioController extends Controller
 {
-    // Manejo de login para los usuarios 
     public function validacion(Request $request) : RedirectResponse {
         
-        // 1. Validamos las credenciales de ingreso 
         $credenciales = $request->validate([
             'email' => ['required', 'email'],
             'contrasena' => ['required'],
-        ], [
-            'email.required' => 'El correo es obligatorio.',
-            'email.email' => 'Ingresa un formato de correo válido.',
-            'contrasena.required' => 'La contraseña es obligatoria.',
         ]);
 
-        // 2. Capturamos si el usuario marcó "Recuérdame"
-        $remember = $request->has('remember');
-
-        // 3. Búsqueda del usuario por email 
         $usuario = Usuario::where('email', $credenciales['email'])->first();
 
-        // 4. Verificar contraseña y email 
         if ($usuario && Hash::check($credenciales['contrasena'], $usuario->contrasena))
         {
-            // Iniciamos sesión pasando el parámetro de persistencia ($remember)
-            Auth::login($usuario, $remember);
+            // Se elimina el parámetro $remember para evitar cookies persistentes
+            Auth::login($usuario); 
             
-            // Regenerar la sesión por seguridad
             $request->session()->regenerate();
 
-            // 5. Redirigir según el rol del usuario
-            $mensaje = '¡Bienvenido de nuevo, ' . $usuario->nombre . '!';
+            $mensaje = '¡Bienvenido, ' . $usuario->nombre . '!';
 
-            if($usuario->id_rol == 1) {
-                return redirect()->intended('admin')->with('success', $mensaje);
-            }
-            
-            if($usuario->id_rol == 2) {
-                return redirect()->intended('nutriologo')->with('success', $mensaje);
-            }
-            
-            if($usuario->id_rol == 3) {
-                return redirect()->intended('entrenador')->with('success', $mensaje);
-            }
-            
-            if($usuario->id_rol == 4) {
-                return redirect()->intended('usuario')->with('success', $mensaje);   
-            }
+            // Redirección por roles
+            return match($usuario->id_rol) {
+                1 => redirect()->intended('admin')->with('success', $mensaje),
+                2 => redirect()->intended('nutriologo')->with('success', $mensaje),
+                3 => redirect()->intended('entrenador')->with('success', $mensaje),
+                4 => redirect()->intended('usuario')->with('success', $mensaje),
+                default => redirect('/'),
+            };
         }
 
-        // 6. Si la autenticación falla
         return back()->withErrors([
             'email' => 'Las credenciales proporcionadas son incorrectas.',
         ])->onlyInput('email');
@@ -67,10 +45,10 @@ class LoginUsuarioController extends Controller
 
     public function cerrar(Request $request): RedirectResponse
     {
-        Auth::logout();
+        Auth::logout(); // Invalida la autenticación en el servidor
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->session()->invalidate(); // Destruye los datos de la sesión
+        $request->session()->regenerateToken(); // Regenera el token CSRF por seguridad
 
         return redirect('/login')->with('success', 'Sesión cerrada correctamente.');
     }

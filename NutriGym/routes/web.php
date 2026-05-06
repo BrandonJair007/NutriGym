@@ -22,6 +22,10 @@ use Illuminate\Auth\Events\Logout;
 // RUTAS DE ACCESO Y AUTENTICACIÓN
 // ==========================================
 
+// ==========================================
+// RUTAS DE ACCESO Y AUTENTICACIÓN
+// ==========================================
+
 Route::get('/', function () {
     return redirect('/login');
 });
@@ -44,11 +48,8 @@ Route::get('logout', function () {
     return view('usuario.logout');
 })->name('logout.confirm');
 
-Route::post('logout', function () {
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    return redirect('/')->with('success', 'Sesión cerrada correctamente');
-})->name('logout');
+// 👇 ESTA ES LA LÍNEA QUE DEBES REEMPLAZAR 👇
+Route::post('/logout', [LoginUsuarioController::class, 'cerrar'])->name('logout');
 
 // ==========================================
 // PERFIL Y MEDIDAS

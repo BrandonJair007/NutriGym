@@ -33,16 +33,6 @@
                 @enderror
             </div>
 
-            <!-- Remember me (Activado) -->
-            <div class="flex items-center mb-6">
-                <input type="checkbox" id="remember" name="remember" 
-                       class="mr-2 cursor-pointer"
-                       {{ old('remember') ? 'checked' : '' }}>
-                <label for="remember" class="text-sm cursor-pointer select-none text-gray-600">
-                    Recuérdame
-                </label>
-            </div>
-
             <!-- Botón -->
             <div class="flex justify-center">
                 <button type="submit" class="btn-neu w-full text-center">

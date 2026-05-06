@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 
-
 class MenuController extends Controller
 {
     //
@@ -74,134 +73,79 @@ class MenuController extends Controller
         }
     }
 
-   // Prueba de Gemini con datos de usuario
-    public function generarDieta()
+   // Generación de Dieta Optimizado con Manejo de Límite (Error 429)
+   public function generarDieta()
     {
         try {
-            // Verificar autenticación
             if (!auth()->check()) {
-                if (request()->ajax()) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'Usuario no autenticado'
-                    ], 401);
-                }
+                if (request()->ajax()) return response()->json(['success' => false, 'error' => 'Usuario no autenticado'], 401);
                 return redirect()->route('login');
             }
             $usuarioId = auth()->id();
 
-            // Obtener datos del usuario
-            $usuario = DB::table('usuarios')
-                ->where('id', $usuarioId)
-                ->select('id', 'nombre', 'email')
-                ->first();
+            $usuario = DB::table('usuarios')->where('id', $usuarioId)->select('id', 'nombre', 'email')->first();
+            if (!$usuario) return response()->json(['success' => false, 'mensaje' => 'Usuario no encontrado'], 404);
 
-            if (!$usuario) {
-                return response()->json([
-                    'success' => false,
-                    'mensaje' => 'Usuario no encontrado'
-                ], 404);
-            }
-
-            // OBTENER ALIMENTOS CON ID Y CALORÍAS
-            $alimentosCompletos = DB::table('alimentos')
-                ->select('id', 'nombre', 'calorias')
-                ->get();
-
-            // Obtener preferencias del usuario
+            $alimentosCompletos = DB::table('alimentos')->select('id', 'nombre', 'calorias')->get();
+            
             $preferencias = DB::table('asignacion_preferencia')
                 ->join('preferencias', 'asignacion_preferencia.id_preferencia', '=', 'preferencias.id')
-                ->where('asignacion_preferencia.id_usuario', $usuarioId)
-                ->select('preferencias.descripcion')
-                ->get();
+                ->where('asignacion_preferencia.id_usuario', $usuarioId)->select('preferencias.descripcion')->get();
 
-            // OBTENER OBJETIVOS DEL USUARIO
             $objetivos = DB::table('asignacion_objetivo')
                 ->join('objetivos', 'asignacion_objetivo.id_objetivo', '=', 'objetivos.id')
-                ->where('asignacion_objetivo.id_usuario', $usuarioId)
-                ->select('objetivos.descripcion')
-                ->get();
+                ->where('asignacion_objetivo.id_usuario', $usuarioId)->select('objetivos.descripcion')->get();
 
-            $alimentosSeleccionados = $this->filtrarAlimentosConIA($alimentosCompletos, $preferencias, 9); // 9 para 3x3
+            $usoIA = false; // Variable para saber si ya gastamos nuestra petición a Google
+
+            // 1. FILTRO DE ALIMENTOS (Solo gastamos la IA si hay preferencias)
+            if ($preferencias->isNotEmpty()) {
+                $alimentosSeleccionados = $this->filtrarAlimentosConIA($alimentosCompletos, $preferencias, 9);
+                $usoIA = true; 
+            } else {
+                // Si no hay preferencias, PHP elige rápido y no gastamos la IA
+                $alimentosSeleccionados = $alimentosCompletos->count() <= 9 
+                    ? $alimentosCompletos 
+                    : $alimentosCompletos->random(9);
+            }
         
-            // DIVIDIR ALIMENTOS POR COMIDAS
             $alimentosPorComida = $this->dividirAlimentosPorComidas($alimentosSeleccionados);
-            
-            // CALCULAR CALORÍAS POR COMIDA Y TOTALES
             $caloriasPorComida = $this->calcularCaloriasPorComida($alimentosPorComida);
             $caloriasTotales = array_sum($caloriasPorComida);
 
-            // CALCULAR GET Y AJUSTAR SEGÚN OBJETIVOS
             $resultadoGET = $this->calcularGET($usuarioId);
             $getValor = $resultadoGET['success'] ? $resultadoGET['get'] : 0;
             
-            // AJUSTAR CALORÍAS SEGÚN OBJETIVOS
             $caloriasRecomendadas = $this->ajustarCaloriasPorObjetivo($getValor, $objetivos);
             $diferenciaCalorias = $caloriasRecomendadas - $caloriasTotales;
 
-            // Generar menú con Gemini
-            $geminiService = new \App\Services\GeminiService();
-            
-            $prompt = "Genera un menú diario con este formato exacto:
-
-            Desayuno: [comida]
-            Almuerzo: [comida] 
-            Cena: [comida]
-
-            Usuario: {$usuario->nombre}";
-
-            if ($preferencias->isNotEmpty()) {
-                $prefText = $preferencias->pluck('descripcion')->implode(', ');
-                $prompt .= "\nPreferencias: {$prefText}";
+            // 2. MENSAJE MOTIVACIONAL
+            if ($usoIA) {
+                // Como ya usamos a Gemini para filtrar la comida, usamos el banco de frases locales para evitar el Error 429
+                $frases = [
+                    "¡Tu dieta está lista, {$usuario->nombre}! Hemos organizado cuidadosamente tus alimentos. ¡Mucho éxito!",
+                    "¡Aquí tienes tu plan, {$usuario->nombre}! Alimentos 100% perfectos para tus preferencias.",
+                    "¡A darle con todo, {$usuario->nombre}! Este menú te ayudará a alcanzar tus metas de salud de esta semana."
+                ];
+                $mensajeGemini = $frases[array_rand($frases)];
+            } else {
+                // Si PHP eligió la comida, Gemini está libre para escribir el mensaje
+                $geminiService = new \App\Services\GeminiService();
+                $promptMensaje = "Actúa como un nutricionista experto. Escribe un mensaje motivacional muy corto (máx 20 palabras) para tu paciente {$usuario->nombre}, animándolo a cumplir su nueva dieta. No uses listas.";
+                $mensajeGemini = $geminiService->generateContent($promptMensaje);
+                
+                // Si por alguna razón de red falla, usamos el salvavidas
+                if (str_contains($mensajeGemini, 'Error') || str_contains($mensajeGemini, '⚠️')) {
+                    $mensajeGemini = "¡Tu dieta está lista, {$usuario->nombre}! Hemos organizado cuidadosamente tus alimentos. ¡Mucho éxito!";
+                }
             }
 
-            // Incluir objetivos en el prompt
-            if ($objetivos->isNotEmpty()) {
-                $objText = $objetivos->pluck('descripcion')->implode(', ');
-                $prompt .= "\nObjetivos: {$objText}";
-                $prompt .= "\nCalorías objetivo: {$caloriasRecomendadas} kcal";
-            }
-
-            // Incluir alimentos organizados por comida en el prompt
-            if (!empty($alimentosPorComida)) {
-                $prompt .= "\n\nAlimentos organizados:";
-                $prompt .= "\nDesayuno: " . $alimentosPorComida['desayuno']->pluck('nombre')->implode(', ');
-                $prompt .= "\nAlmuerzo: " . $alimentosPorComida['almuerzo']->pluck('nombre')->implode(', ');
-                $prompt .= "\nCena: " . $alimentosPorComida['cena']->pluck('nombre')->implode(', ');
-            }
-
-            $prompt .= "\n\nResponde solo con el menú en el formato solicitado.";
-
-            // --- SOLUCIÓN AL ERROR 429 (Límite de velocidad de la API) ---
-            // Le damos 3 segundos de respiro a Gemini entre la primera y la segunda petición
-            sleep(3);
-
-            $mensajeGemini = $geminiService->generateContent($prompt);
-            
             return response()->json([
                 'mensaje_personalizado' => $mensajeGemini,
                 'alimentos_por_comida' => [
-                    'desayuno' => $alimentosPorComida['desayuno']->map(function($alimento) {
-                        return [
-                            'id' => $alimento->id,
-                            'nombre' => $alimento->nombre,
-                            'calorias' => $alimento->calorias
-                        ];
-                    }),
-                    'almuerzo' => $alimentosPorComida['almuerzo']->map(function($alimento) {
-                        return [
-                            'id' => $alimento->id,
-                            'nombre' => $alimento->nombre,
-                            'calorias' => $alimento->calorias
-                        ];
-                    }),
-                    'cena' => $alimentosPorComida['cena']->map(function($alimento) {
-                        return [
-                            'id' => $alimento->id,
-                            'nombre' => $alimento->nombre,
-                            'calorias' => $alimento->calorias
-                        ];
-                    })
+                    'desayuno' => $alimentosPorComida['desayuno']->map(fn($a) => ['id' => $a->id, 'nombre' => $a->nombre, 'calorias' => $a->calorias]),
+                    'almuerzo' => $alimentosPorComida['almuerzo']->map(fn($a) => ['id' => $a->id, 'nombre' => $a->nombre, 'calorias' => $a->calorias]),
+                    'cena' => $alimentosPorComida['cena']->map(fn($a) => ['id' => $a->id, 'nombre' => $a->nombre, 'calorias' => $a->calorias])
                 ],
                 'calorias_por_comida' => $caloriasPorComida,
                 'calorias_totales' => $caloriasTotales,
@@ -213,14 +157,9 @@ class MenuController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'mensaje' => 'Error: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'mensaje' => 'Error: ' . $e->getMessage()], 500);
         }
     }
-
-
 
     // AJUSTAR CALORÍAS SEGÚN OBJETIVOS
     private function ajustarCaloriasPorObjetivo($getBase, $objetivos)
@@ -231,17 +170,13 @@ class MenuController extends Controller
             $descripcion = strtolower($objetivo->descripcion);
             
             if (strpos($descripcion, 'bajar') !== false || strpos($descripcion, 'perder') !== false || strpos($descripcion, 'reducir') !== false) {
-                // Déficit calórico para bajar de peso (15-20% menos)
-                $caloriasAjustadas = $getBase * 0.80; // 20% menos
+                $caloriasAjustadas = $getBase * 0.80; 
             } elseif (strpos($descripcion, 'subir') !== false || strpos($descripcion, 'aumentar') !== false || strpos($descripcion, 'ganar') !== false) {
-                // Superávit calórico para subir de peso (10-15% más)
-                $caloriasAjustadas = $getBase * 1.15; // 15% más
+                $caloriasAjustadas = $getBase * 1.15; 
             } elseif (strpos($descripcion, 'mantener') !== false || strpos($descripcion, 'conservar') !== false) {
-                // Mantener peso (GET base)
                 $caloriasAjustadas = $getBase;
             } elseif (strpos($descripcion, 'definir') !== false || strpos($descripcion, 'tonificar') !== false || strpos($descripcion,'desarrollar') !== false) {
-                // Déficit moderado para definición muscular
-                $caloriasAjustadas = $getBase * 0.85; // 15% menos
+                $caloriasAjustadas = $getBase * 0.85; 
             }
         }
         
@@ -285,40 +220,43 @@ class MenuController extends Controller
         ];
     }
 
-    // FILTRADO INTELIGENTE CON IA (actualizado para trabajar con objetos completos)
+    // FILTRADO INTELIGENTE CON IA (Optimizado)
     private function filtrarAlimentosConIA($alimentos, $preferencias, $cantidad = 9)
     {
+        // 🚀 OPTIMIZACIÓN GIGANTE: Si el usuario NO tiene preferencias de alergias/gustos,
+        // no usamos la IA para filtrar. PHP elegirá aleatoriamente en 0.001 segundos.
+        if ($preferencias->isEmpty()) {
+            if ($alimentos->count() <= $cantidad) return $alimentos;
+            return $alimentos->random($cantidad);
+        }
+
+        // Si SÍ hay preferencias, consultamos a la IA (Solo ocurre si es estrictamente necesario)
         $geminiService = new \App\Services\GeminiService();
         
         $listaAlimentos = $alimentos->pluck('nombre')->implode(', ');
         
-        $promptFiltrado = "Selecciona EXACTAMENTE {$cantidad} alimentos de esta lista que sean compatibles con: " . 
-                        ($preferencias->isNotEmpty() ? $preferencias->pluck('descripcion')->implode(', ') : 'Ninguna') . 
-                        "\n\nLista: {$listaAlimentos}\n\nRespuesta solo con nombres separados por coma:";
+        $promptFiltrado = "Selecciona EXACTAMENTE {$cantidad} alimentos de esta lista compatibles con: " . 
+                        $preferencias->pluck('descripcion')->implode(', ') . 
+                        "\n\nLista: {$listaAlimentos}\n\nResponde SOLO con los nombres separados por coma:";
 
         $respuestaIA = $geminiService->generateContent($promptFiltrado);
         
-        // DEBUG: Ver qué respondió la IA
-        \Log::info("IA respondió: " . $respuestaIA);
-        \Log::info("Número de alimentos encontrados: " . $alimentos->count());
+        \Log::info("IA filtró alimentos: " . $respuestaIA);
         
         return $this->procesarRespuestaFiltrado($respuestaIA, $alimentos, $cantidad);
     }
 
-
-    // PROCESAR RESPUESTA DE IA (actualizado para mantener objetos completos)
+    // PROCESAR RESPUESTA DE IA
     private function procesarRespuestaFiltrado($respuestaIA, $alimentos, $cantidad)
     {
         // Limpiar y dividir la respuesta
         $nombresSeleccionados = array_map('trim', explode(',', $respuestaIA));
         
-        // Buscar los objetos completos de alimentos
         $resultado = collect();
         
         foreach ($nombresSeleccionados as $nombreAlimento) {
             if (empty(trim($nombreAlimento))) continue;
             
-            // Buscar el alimento completo en la colección original
             $alimentoEncontrado = $alimentos->first(function($alimento) use ($nombreAlimento) {
                 return stripos($alimento->nombre, $nombreAlimento) !== false || 
                     stripos($nombreAlimento, $alimento->nombre) !== false;
@@ -328,13 +266,12 @@ class MenuController extends Controller
                 $resultado->push($alimentoEncontrado);
             }
             
-            // Limitar a la cantidad deseada
             if ($resultado->count() >= $cantidad) {
                 break;
             }
         }
         
-        // Si la IA no seleccionó suficientes, agregar algunos aleatorios
+        // Si la IA falló o no seleccionó suficientes, completar con aleatorios
         if ($resultado->count() < $cantidad) {
             $faltantes = $cantidad - $resultado->count();
             $alimentosRestantes = $alimentos->whereNotIn('id', $resultado->pluck('id'));
@@ -349,9 +286,6 @@ class MenuController extends Controller
         return $resultado;
     }
 
-
-
-
     public function store(Request $request)
     {
         $request->validate([
@@ -365,7 +299,6 @@ class MenuController extends Controller
         DB::beginTransaction();
 
         try {
-            // 1. Primero crear en asignacion_menus
             $asignacion = AsignacionMenu::create([
                 'id_usuario' => auth()->id(),
                 'tipo' => $request->tipo,
@@ -373,7 +306,6 @@ class MenuController extends Controller
                 'fecha_asignacion' => $request->fecha_asignacion
             ]);
 
-            // 2. Luego guardar los alimentos en menu_alimentos
             $alimentosData = [];
             foreach ($request->alimentos as $idAlimento) {
                 $alimentosData[] = [
@@ -407,11 +339,10 @@ class MenuController extends Controller
         }
     }
 
-    // Método para obtener menús por usuario
     public function getMyMenus()
     {
         $menus = AsignacionMenu::with('alimentos.alimento')
-            ->where('id_usuario', auth()->id()) // ✅ Solo menús del usuario autenticado
+            ->where('id_usuario', auth()->id())
             ->orderBy('fecha_asignacion', 'desc')
             ->get();
 
@@ -424,7 +355,7 @@ class MenuController extends Controller
     public function getByUsuario($id)
     {
         $menus = AsignacionMenu::with('alimentos.alimento')
-            ->where('id_usuario', $id) // ✅ Solo menús del usuario autenticado
+            ->where('id_usuario', $id)
             ->orderBy('fecha_asignacion', 'desc')
             ->get();
 
@@ -438,7 +369,6 @@ class MenuController extends Controller
     {
         $menu = AsignacionMenu::findOrFail($id);
         
-        // Toggle del campo validado
         $menu->validado = !$menu->validado;
         $menu->save();
         
@@ -447,6 +377,4 @@ class MenuController extends Controller
             'menu' => $menu
         ]);
     }
-
 }
-

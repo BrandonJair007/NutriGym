@@ -6,8 +6,10 @@ class GeminiService
 {
     public function generateContent($prompt)
     {
+        // 1. Obtener la clave API
         $apiKey = env('GOOGLE_API_KEY');
         
+        // 2. Restauramos TU modelo original (gemini-2.0-flash-lite) que sí es compatible con tu API Key
         $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=' . $apiKey;
         
         $data = [
@@ -20,65 +22,47 @@ class GeminiService
             ]
         ];
         
-        $maxIntentos = 3; // Intentará hasta 3 veces antes de rendirse
-        $intento = 0;
-        $httpCode = 0;
-        $response = '';
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 15, // Corta a los 15 segundos máximo
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+            ],
+        ]);
         
-        // Bucle Inteligente de Reintentos
-        while ($intento < $maxIntentos) {
-            $ch = curl_init();
-            curl_setopt_array($ch, [
-                CURLOPT_URL => $url,
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => json_encode($data),
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/json',
-                ],
-            ]);
-            
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            
-            // Si el código es 200 (Éxito), rompemos el bucle y continuamos
-            if ($httpCode === 200) {
-                break; 
-            }
-            
-            // Si el código es 429 (Límite de velocidad)
-            if ($httpCode === 429) {
-                $intento++;
-                // Si ya intentó 3 veces, enviamos un mensaje amigable
-                if ($intento >= $maxIntentos) {
-                    return "¡Tu dieta está lista! (Nota: Nuestro nutricionista IA está atendiendo a muchos pacientes ahora mismo, pero tus alimentos han sido seleccionados exitosamente).";
-                }
-                // Si falló, lo hacemos dormir 6 segundos y vuelve a intentar
-                sleep(6); 
-                continue;
-            }
-            
-            // Si es otro error (como 500, etc)
-            return "Error: HTTP {$httpCode}";
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+        
+        // Error de servidor local
+        if ($curlError) {
+            return "⚠️ Error de conexión en tu servidor local: " . $curlError;
         }
         
         $responseData = json_decode($response, true);
-        
-        // Extraer texto de manera segura
-        if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
+
+        // Éxito (200)
+        if ($httpCode === 200 && isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
             return $responseData['candidates'][0]['content']['parts'][0]['text'];
         }
         
-        if (isset($responseData['candidates'][0]['content']['parts'][0])) {
-            return $responseData['candidates'][0]['content']['parts'][0];
+        // SI FALLA: Mostrará el error real
+        if (isset($responseData['error']['message'])) {
+            $mensajeError = $responseData['error']['message'];
+            
+            if ($httpCode === 429) {
+                return "⚠️ Error 429: El nutricionista IA está muy ocupado. Espera unos segundos y vuelve a generar la dieta.";
+            }
+            
+            return "⚠️ Error de Gemini ({$httpCode}): " . $mensajeError;
         }
         
-        if (isset($responseData['candidates'][0]['content']['text'])) {
-            return $responseData['candidates'][0]['content']['text'];
-        }
-        
-        return "¡Aquí tienes tu selección de alimentos para el día de hoy!";
+        return "⚠️ Error Desconocido HTTP {$httpCode}";
     }
 }

@@ -314,7 +314,14 @@
                 <div class="w-10 h-10 bg-purple-100 text-purple-500 rounded-xl flex items-center justify-center"><i class="fas fa-magic"></i></div>
                 Asistente Nutricional IA
             </h3>
-            <button onclick="cerrarModal()" class="text-gray-400 hover:text-red-500 bg-white shadow-sm p-2 rounded-full transition-colors"><i class="fas fa-times"></i></button>
+            
+            <!-- NUEVO BOTÓN "X" PARA CERRAR EL MODAL -->
+            <button type="button" onclick="cerrarModal()" class="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition-colors focus:outline-none flex items-center justify-center w-10 h-10 shadow-sm bg-white border border-gray-100">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            
         </div>
         <div id="resultado-preferencia" class="mt-2 px-6"></div>
         <div class="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar" id="modal-contenido">
@@ -326,6 +333,7 @@
 <!-- Modal Mis Dietas -->
 <div id="dietasModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative z-10">
+        <!-- Cabecera -->
         <div class="p-6 border-b border-gray-100 flex justify-between items-center">
             <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
                 <div class="w-10 h-10 bg-green-50 text-green-500 rounded-xl flex items-center justify-center"><i class="fas fa-book-open"></i></div>
@@ -333,10 +341,29 @@
             </h3>
             <button onclick="cerrarDietas()" class="text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors"><i class="fas fa-times"></i></button>
         </div>
+        
+        <!-- Contenido -->
         <div id="dietasContent" class="flex-1 p-6 overflow-y-auto custom-scrollbar bg-gray-50/50">
             <div class="text-center py-16"><i class="fas fa-spinner fa-spin text-4xl text-green-500 mb-4"></i><p class="text-gray-500 font-medium">Cargando tus planes de alimentación...</p></div>
         </div>
+
+        <!-- 👇 NUEVO FOOTER ESTILO "OBJETIVOS" 👇 -->
+        <div class="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
+            <button type="button" onclick="cerrarDietas()" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl hover:bg-gray-100 font-bold transition-colors">
+                Cerrar
+            </button>
+            <button type="button" onclick="cerrarDietas(); generarDieta();" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold transition-colors shadow-md">
+                <i class="fas fa-magic mr-2"></i> Generar Nueva Dieta
+            </button>
+        </div>
+        <!-- 👆 FIN DEL FOOTER 👆 -->
     </div>
+</div>
+<!-- SAFELIST PARA TAILWIND (Fuerza la carga de colores dinámicos del Asistente IA) -->
+<div class="hidden">
+    <span class="from-yellow-50 to-yellow-100 border-yellow-200 text-yellow-500 bg-yellow-500 hover:bg-yellow-600 bg-yellow-50 text-yellow-600 text-yellow-400"></span>
+    <span class="from-orange-50 to-orange-100 border-orange-200 text-orange-500 bg-orange-500 hover:bg-orange-600 bg-orange-50 text-orange-600 text-orange-400"></span>
+    <span class="from-blue-50 to-blue-100 border-blue-200 text-blue-500 bg-blue-500 hover:bg-blue-600 bg-blue-50 text-blue-600 text-blue-400"></span>
 </div>
 
 
@@ -1847,5 +1874,7 @@ function mostrarErrorDietasModal(mensaje) {
         </div>
     `;
 }
+
+
 </script>
 @endsection
