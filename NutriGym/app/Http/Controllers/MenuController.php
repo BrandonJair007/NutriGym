@@ -377,4 +377,37 @@ class MenuController extends Controller
             'menu' => $menu
         ]);
     }
+
+    public function destroy($id)
+    {
+        try {
+            $menu = AsignacionMenu::findOrFail($id);
+            
+            // Seguridad: Verificar que la dieta pertenezca al usuario actual
+            if ($menu->id_usuario !== auth()->id()) {
+                return response()->json(['success' => false, 'message' => 'No autorizado'], 403);
+            }
+
+            // Eliminar los alimentos asociados a este menú primero
+            MenuAlimento::where('asignacion_menu_id', $menu->id)->delete();
+            
+            // Eliminar la dieta principal
+            $menu->delete();
+
+            // Obtener el nuevo total de dietas para actualizar la tarjeta principal
+            $totalMenus = AsignacionMenu::where('id_usuario', auth()->id())->count();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Dieta eliminada correctamente',
+                'total_menus' => $totalMenus
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

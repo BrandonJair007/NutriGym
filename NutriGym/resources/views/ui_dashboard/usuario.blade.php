@@ -366,6 +366,40 @@
     <span class="from-blue-50 to-blue-100 border-blue-200 text-blue-500 bg-blue-500 hover:bg-blue-600 bg-blue-50 text-blue-600 text-blue-400"></span>
 </div>
 
+<div id="verPreferenciasModal" class="fixed inset-0 z-50 hidden">
+    <div class="modal-backdrop fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="closeModal('verPreferenciasModal')"></div>
+    <div class="fixed inset-0 flex items-start sm:items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col relative z-10">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center"><i class="fas fa-heartbeat"></i></div>
+                    Mis Preferencias Activas
+                </h3>
+                <button onclick="closeModal('verPreferenciasModal')" class="text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <div id="loadingVerPreferencias" class="text-center py-12"><i class="fas fa-spinner fa-spin text-3xl text-red-500"></i><p class="text-gray-500 mt-4">Consultando tu perfil...</p></div>
+                <div id="listaVerPreferencias" class="space-y-3 hidden"></div>
+                <div id="sinPreferencias" class="text-center py-12 hidden">
+                    <i class="fas fa-apple-alt text-5xl text-gray-200 mb-4"></i>
+                    <p class="text-gray-500 font-medium">Aún no has indicado tus preferencias alimenticias.</p>
+                </div>
+                <div id="errorVerPreferencias" class="text-center py-8 hidden"><p class="text-red-500 font-bold">Error al cargar los datos</p></div>
+            </div>
+            
+            <div class="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
+                <button type="button" onclick="closeModal('verPreferenciasModal')" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl hover:bg-gray-100 font-bold transition-colors">
+                    Cerrar
+                </button>
+                <button type="button" onclick="closeModal('verPreferenciasModal'); abrirModalAsignarPreferencias();" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold transition-colors shadow-md">
+                    <i class="fas fa-plus mr-2"></i> Sumar Preferencia
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- ========================================== -->
 <!-- SCRIPTS Y LÓGICA (100% INTACTOS) -->
@@ -1740,6 +1774,7 @@ function verDietas() {
         });
 }
 
+
 function renderDietas(menus) {
     const dietasContainer = document.getElementById('dietasContent');
     
@@ -1776,7 +1811,6 @@ function renderDietas(menus) {
                 
                 return `
                 <div class="border border-gray-100 rounded-2xl p-6 bg-white shadow-sm">
-                    <!-- Header del tipo -->
                     <div class="flex items-center mb-6 pb-4 border-b border-gray-50">
                         <div class="w-12 h-12 bg-${getColorTipo(tipo)}-50 text-${getColorTipo(tipo)}-500 rounded-xl flex items-center justify-center text-2xl mr-4">
                             <i class="fas ${getIconoTipo(tipo)}"></i>
@@ -1787,17 +1821,23 @@ function renderDietas(menus) {
                         </div>
                     </div>
 
-                    <!-- Menús de este tipo -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         ${menusDelTipo.map(menu => {
                             const alimentosMenu = menu.alimentos || [];
                             const caloriasTotales = menu.calorias || alimentosMenu.reduce((sum, al) => sum + (al.calorias || 0), 0);
                             
+                            // Lógica segura para el sello del nutriólogo (por si decides usarlo después)
+                            let badgeHtml = '';
+                            if (menu.validado !== undefined) {
+                                badgeHtml = (menu.validado == 1 || menu.validado === true) 
+                                    ? '<span class="mt-3 bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2 py-1 rounded-md flex items-center w-max"><i class="fas fa-check-circle mr-1 text-green-500"></i> Aprobado por Nutriólogo</span>'
+                                    : '<span class="mt-3 bg-yellow-50 text-yellow-700 border border-yellow-200 text-[10px] font-bold px-2 py-1 rounded-md flex items-center w-max"><i class="fas fa-clock mr-1 text-yellow-500"></i> Revisión Pendiente</span>';
+                            }
+                            
                             return `
-                            <div class="border border-gray-100 rounded-xl p-5 bg-gray-50/50 hover:bg-white hover:shadow-md transition-all group">
-                                <!-- Header del menú -->
+                            <div class="border border-gray-100 rounded-xl p-5 bg-gray-50/50 hover:bg-white hover:shadow-md transition-all group relative">
                                 <div class="flex justify-between items-start mb-4">
-                                    <div class="flex-1">
+                                    <div class="flex-1 pr-2">
                                         <h5 class="font-bold text-gray-800 text-lg mb-1">
                                             ${menu.nombre || `Plan de ${tipo}`}
                                         </h5>
@@ -1805,14 +1845,19 @@ function renderDietas(menus) {
                                             <i class="fas fa-calendar-alt mr-1"></i>
                                             Guardado el ${new Date(menu.fecha_asignacion).toLocaleDateString('es-ES')}
                                         </div>
+                                        ${badgeHtml}
                                     </div>
-                                    <span class="bg-${getColorTipo(tipo)}-100 text-${getColorTipo(tipo)}-700 text-xs font-bold px-3 py-1 rounded-lg">
-                                        ${caloriasTotales} kcal
-                                    </span>
+                                    <div class="flex flex-col items-end gap-2">
+                                        <span class="bg-${getColorTipo(tipo)}-100 text-${getColorTipo(tipo)}-700 text-xs font-bold px-3 py-1 rounded-lg h-max">
+                                            ${caloriasTotales} kcal
+                                        </span>
+                                        <button onclick="eliminarDieta(${menu.id})" class="text-red-500 hover:text-white hover:bg-red-500 bg-red-50 px-2 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-sm">
+                                            <i class="fas fa-trash-alt"></i> Eliminar
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <!-- Alimentos del menú -->
-                                <div class="mb-4">
+                                <div>
                                     <h6 class="font-bold text-gray-400 text-[10px] uppercase tracking-wider mb-2">
                                         Ingredientes de la porción
                                     </h6>
@@ -1840,6 +1885,35 @@ function renderDietas(menus) {
     `;
 }
 
+// Lógica para enviar la orden de borrado a tu base de datos
+function eliminarDieta(id) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta dieta de tu historial?')) {
+        fetch(`/menus/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Actualizamos el contador visual en la tarjeta
+                const contador = document.getElementById('contadorDietas');
+                if (contador) contador.textContent = data.total_menus;
+                
+                // Recargamos el modal automáticamente
+                verDietas(); 
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al intentar eliminar la dieta');
+        });
+    }
+}
 // Funciones auxiliares
 function getIconoTipo(tipo) {
     const iconos = {
@@ -1875,6 +1949,37 @@ function mostrarErrorDietasModal(mensaje) {
     `;
 }
 
+function eliminarDieta(id) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta dieta de tu historial?')) {
+        fetch(`/menus/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 1. Actualizar el contador gigante en la tarjeta principal de dietas
+                const contador = document.getElementById('contadorDietas');
+                if (contador) {
+                    contador.textContent = data.total_menus;
+                }
+                
+                // 2. Recargar la ventana del historial de dietas al instante
+                verDietas(); 
+                
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al intentar eliminar la dieta');
+        });
+    }
+}
 
 </script>
 @endsection

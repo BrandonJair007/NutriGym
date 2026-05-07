@@ -22,10 +22,6 @@ use Illuminate\Auth\Events\Logout;
 // RUTAS DE ACCESO Y AUTENTICACIÓN
 // ==========================================
 
-// ==========================================
-// RUTAS DE ACCESO Y AUTENTICACIÓN
-// ==========================================
-
 Route::get('/', function () {
     return redirect('/login');
 });
@@ -99,6 +95,14 @@ Route::get('/menus/mis-menus', [MenuController::class, 'getMyMenus'])->middlewar
 Route::get('/mis-dietas', [MenuController::class, 'getMyMenus'])->name('dietas.mis-dietas');
 Route::get('/menu/calcular-get/{usuarioId}', [MenuController::class, 'calcularGET']);
 
+Route::get('/dashboard/generar-dieta', [MenuController::class, 'generarDieta']);
+Route::post('/menus', [MenuController::class, 'store']);
+Route::get('/menus/mis-menus', [MenuController::class, 'getMyMenus'])->middleware('auth');
+Route::get('/mis-dietas', [MenuController::class, 'getMyMenus'])->name('dietas.mis-dietas');
+Route::get('/menu/calcular-get/{usuarioId}', [MenuController::class, 'calcularGET']);
+
+// 👇 AGREGA ESTA NUEVA LÍNEA 👇
+Route::delete('/menus/{id}', [MenuController::class, 'destroy'])->name('menus.destroy');
 // ==========================================
 // MÓDULO NUTRIÓLOGO
 // ==========================================
